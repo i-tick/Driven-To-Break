@@ -58,7 +58,8 @@ visualisation-project
 
 3. Run the application:
    ```
-   python run.py
+   export FLASK_APP=run.py
+   flask run
    ```
 
 4. Open your web browser and navigate to `http://127.0.0.1:5000` to view the application.
