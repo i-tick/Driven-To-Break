@@ -1,0 +1,11 @@
+year,team,driver,failureType,reasonRetired
+2020,Team A,Driver 1,Mechanical,Engine Failure
+2020,Team B,Driver 2,Crash,Collision
+2021,Team A,Driver 1,Mechanical,Transmission Failure
+2021,Team C,Driver 3,Technical,Electrical Issue
+2022,Team B,Driver 2,Mechanical,Brake Failure
+2022,Team D,Driver 4,Crash,Spin Out
+2023,Team A,Driver 1,Mechanical,Engine Failure
+2023,Team C,Driver 3,Technical,Software Glitch
+2023,Team B,Driver 2,Mechanical,Tire Failure
+2023,Team D,Driver 4,Crash,Collision

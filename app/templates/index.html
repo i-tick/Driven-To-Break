@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visualization Project</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <script src="{{ url_for('static', filename='d3/d3.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/visualizations.js') }}"></script>
+</head>
+<body>
+    <header>
+        <h1>Welcome to the Visualization Project</h1>
+        <nav>
+            <ul>
+                <li><a href="{{ url_for('main.visualizations') }}">View Visualizations</a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <section>
+            <h2>Overview of Visualizations</h2>
+            <p>This project provides various visualizations related to F1 DNFs (Did Not Finish) over time, failure causes, team reliability, and more.</p>
+            <p>Select a visualization from the menu to explore the data.</p>
+        </section>
+    </main>
+    <footer>
+        <p>&copy; 2023 Visualization Project</p>
+    </footer>
+</body>
+</html>
