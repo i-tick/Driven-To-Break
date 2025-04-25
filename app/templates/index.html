@@ -3,29 +3,57 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Visualization Project</title>
+    <title>F1 Visualization Dashboard</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
     <script src="{{ url_for('static', filename='d3/d3.min.js') }}"></script>
     <script src="{{ url_for('static', filename='js/visualizations.js') }}"></script>
 </head>
 <body>
     <header>
-        <h1>Welcome to the Visualization Project</h1>
+        <img src="https://www.formula1.com/etc/designs/fom-website/images/f1_logo.svg" alt="Formula 1 Logo" class="f1-logo">
+        <h1>F1 Visualization Dashboard</h1>
         <nav>
             <ul>
                 <li><a href="{{ url_for('main.visualizations') }}">View Visualizations</a></li>
+                <li><a href="#">Teams</a></li>
+                <li><a href="#">Drivers</a></li>
+                <li><a href="#">Statistics</a></li>
             </ul>
         </nav>
     </header>
     <main>
         <section>
-            <h2>Overview of Visualizations</h2>
-            <p>This project provides various visualizations related to F1 DNFs (Did Not Finish) over time, failure causes, team reliability, and more.</p>
-            <p>Select a visualization from the menu to explore the data.</p>
+            <h2>Race Performance Analysis</h2>
+            <p>Explore comprehensive data visualizations related to Formula 1 DNFs (Did Not Finish) over time, 
+            failure causes, team reliability, and driver performance metrics.</p>
+            <p>Our dashboard provides deep insights into the technical aspects of F1 racing, helping you understand 
+            the factors that influence race outcomes.</p>
+            <div class="cta-buttons">
+                <a href="{{ url_for('main.visualizations') }}" class="button">Explore Visualizations</a>
+            </div>
+        </section>
+        
+        <section>
+            <h2>Key Features</h2>
+            <div class="features">
+                <div class="feature">
+                    <h3>DNF Analysis</h3>
+                    <p>Track Did Not Finish incidents across seasons and identify patterns in mechanical failures.</p>
+                </div>
+                <div class="feature">
+                    <h3>Team Reliability</h3>
+                    <p>Compare reliability metrics across different teams and technical eras.</p>
+                </div>
+                <div class="feature">
+                    <h3>Performance Trends</h3>
+                    <p>Visualize performance data to spot emerging trends and historical patterns.</p>
+                </div>
+            </div>
         </section>
     </main>
     <footer>
-        <p>&copy; 2023 Visualization Project</p>
+        <p>&copy; 2023 F1 Visualization Dashboard | Data-Driven Analysis</p>
     </footer>
 </body>
 </html>

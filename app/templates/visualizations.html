@@ -3,26 +3,119 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Visualizations</title>
+    <title>F1 Visualizations Dashboard</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
-    <script src="{{ url_for('static', filename='d3/d3.min.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/visualizations.js') }}"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <script src="{{ url_for('static', filename='d3/d3.min.js') }}" defer></script>
+    <script src="{{ url_for('static', filename='js/dashboard-controls.js') }}" defer></script>
+    <script src="{{ url_for('static', filename='js/visualizations.js') }}" defer></script>
+    <script src="{{ url_for('static', filename='js/dnf_over_time.js') }}" defer></script>
+    <script src="{{ url_for('static', filename='js/failure_cause_breakdown.js') }}" defer></script>
+    <script src="{{ url_for('static', filename='js/team_reliability_ranking.js') }}" defer></script>
+    <script src="{{ url_for('static', filename='js/tyre_vs_engine_failure.js') }}" defer></script>
+    <script src="{{ url_for('static', filename='js/driver_experience_vs_dnfs.js') }}" defer></script>
+    <script src="{{ url_for('static', filename='js/circuit_risk_index.js') }}" defer></script>
 </head>
-<body>
-    <div class="container">
-        <h1>F1 DNFs Visualizations</h1>
-        
-        <div id="dnfs-over-time" class="visualization"></div>
-        <div id="failure-cause-breakdown" class="visualization"></div>
-        <div id="team-reliability-ranking" class="visualization"></div>
-        <div id="tyre-vs-engine-failure" class="visualization"></div>
-        <div id="driver-experience-vs-dnfs" class="visualization"></div>
-        <div id="circuit-risk-index" class="visualization"></div>
-        <div id="factors-influencing-dnfs" class="visualization"></div>
-        
-        <div class="controls">
-            <!-- Controls for filtering and interacting with the visualizations will go here -->
+<body class="visualization-page">
+    <header class="dashboard-header">
+        <img src="https://www.formula1.com/etc/designs/fom-website/images/f1_logo.svg" alt="Formula 1 Logo" class="f1-logo-small">
+        <h1>F1 Performance Analytics</h1>
+        <nav>
+            <ul>
+                <li><a href="{{ url_for('main.index') }}">Home</a></li>
+                <li><a href="#">Teams</a></li>
+                <li><a href="#">Drivers</a></li>
+                <li><a href="#">Settings</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <div class="dashboard-grid">
+        <div id="dnfs-over-time" class="visualization-card">
+            <h3>DNFs Over Time</h3>
+            <button class="expand-button" title="Expand visualization">
+                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M3,3H9V5H5V9H3V3M21,3V9H19V5H15V3H21M3,21V15H5V19H9V21H3M19,21H15V19H19V15H21V21"/>
+                </svg>
+            </button>
+            <div class="viz-content"></div>
         </div>
+        
+        <div id="failure-cause-breakdown" class="visualization-card">
+            <h3>Failure Cause Breakdown</h3>
+            <button class="expand-button" title="Expand visualization">
+                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M3,3H9V5H5V9H3V3M21,3V9H19V5H15V3H21M3,21V15H5V19H9V21H3M19,21H15V19H19V15H21V21"/>
+                </svg>
+            </button>
+            <div class="viz-content"></div>
+        </div>
+        
+        <div id="team-reliability-ranking" class="visualization-card">
+            <h3>Team Reliability Ranking</h3>
+            <button class="expand-button" title="Expand visualization">
+                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M3,3H9V5H5V9H3V3M21,3V9H19V5H15V3H21M3,21V15H5V19H9V21H3M19,21H15V19H19V15H21V21"/>
+                </svg>
+            </button>
+            <div class="viz-content"></div>
+        </div>
+        
+        <div id="tyre-vs-engine-failure" class="visualization-card">
+            <h3>Tyre vs Engine Failures</h3>
+            <button class="expand-button" title="Expand visualization">
+                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M3,3H9V5H5V9H3V3M21,3V9H19V5H15V3H21M3,21V15H5V19H9V21H3M19,21H15V19H19V15H21V21"/>
+                </svg>
+            </button>
+            <div class="viz-content"></div>
+        </div>
+        
+        <div id="driver-experience-vs-dnfs" class="visualization-card">
+            <h3>Driver Experience vs DNFs</h3>
+            <button class="expand-button" title="Expand visualization">
+                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M3,3H9V5H5V9H3V3M21,3V9H19V5H15V3H21M3,21V15H5V19H9V21H3M19,21H15V19H19V15H21V21"/>
+                </svg>
+            </button>
+            <div class="viz-content"></div>
+        </div>
+        
+        <div id="circuit-risk-index" class="visualization-card">
+            <h3>Circuit Risk Index</h3>
+            <button class="expand-button" title="Expand visualization">
+                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M3,3H9V5H5V9H3V3M21,3V9H19V5H15V3H21M3,21V15H5V19H9V21H3M19,21H15V19H19V15H21V21"/>
+                </svg>
+            </button>
+            <div class="viz-content"></div>
+        </div>
+    </div>
+
+    <div class="dashboard-controls">
+        <div class="filter-group">
+            <label for="season-filter">Season:</label>
+            <select id="season-filter" class="filter-select">
+                <option value="all">All Seasons</option>
+                <option value="2023">2023</option>
+                <option value="2022">2022</option>
+                <option value="2021">2021</option>
+                <option value="2020">2020</option>
+            </select>
+        </div>
+
+        <div class="filter-group">
+            <label for="team-filter">Team:</label>
+            <select id="team-filter" class="filter-select">
+                <option value="all">All Teams</option>
+                <option value="mercedes">Mercedes</option>
+                <option value="redbull">Red Bull</option>
+                <option value="ferrari">Ferrari</option>
+                <option value="mclaren">McLaren</option>
+            </select>
+        </div>
+
+        <button class="button dashboard-button">Apply Filters</button>
     </div>
 </body>
 </html>
