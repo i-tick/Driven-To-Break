@@ -183,6 +183,10 @@ function createTeamReliabilityChart() {
                     d3.select(this)
                         .style("stroke", "#2a2a2a")
                         .style("stroke-width", "1px");
+                })
+                .on("click", function(event, d) {
+                    // Emit a custom event for cross-filtering by team
+                    window.dispatchEvent(new CustomEvent('teamSelected', { detail: { team: d.data.team } }));
                 });
             
             // Add X axis
@@ -334,6 +338,10 @@ function createTeamReliabilityChart() {
                                 d3.select(this)
                                     .style("stroke", "#2a2a2a")
                                     .style("stroke-width", "1px");
+                            })
+                            .on("click", function(event, d) {
+                                // Emit a custom event for cross-filtering by team
+                                window.dispatchEvent(new CustomEvent('teamSelected', { detail: { team: d.data.team } }));
                             });
                         
                         // Add X axis

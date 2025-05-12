@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>F1 Drivers Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <script src="{{ url_for('static', filename='d3/d3.min.js') }}" defer></script>
+    <script src="{{ url_for('static', filename='js/drivers.js') }}" defer></script>
+</head>
+<body class="visualization-page">
+    <header class="dashboard-header">
+        <img src="https://www.formula1.com/etc/designs/fom-website/images/f1_logo.svg" alt="Formula 1 Logo" class="f1-logo-small">
+        <h1>F1 Driver Analytics</h1>
+        <nav>
+            <ul>
+                <li><a href="{{ url_for('main.index') }}">Home</a></li>
+                <li><a href="{{ url_for('main.visualizations') }}">Visualizations</a></li>
+                <li><a href="{{ url_for('main.teams') }}">Teams</a></li>
+                <li><a href="{{ url_for('main.drivers') }}" class="active">Drivers</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <div class="search-container">
+        <input type="text" id="driver-search" placeholder="Search drivers...">
+        <select id="driver-filter">
+            <option value="all">All Teams</option>
+            <option value="mercedes">Mercedes</option>
+            <option value="red-bull">Red Bull</option>
+            <option value="ferrari">Ferrari</option>
+            <option value="mclaren">McLaren</option>
+            <option value="alpine">Alpine</option>
+            <option value="aston-martin">Aston Martin</option>
+            <option value="williams">Williams</option>
+            <option value="rb">RB</option>
+            <option value="haas">Haas</option>
+            <option value="sauber">Sauber</option>
+        </select>
+    </div>
+
+    <div class="driver-grid">
+        <!-- Lewis Hamilton -->
+        <div class="driver-card mercedes">
+            <div class="driver-header">
+                <img src="{{ url_for('static', filename='images/drivers/lewis-hamilton.png') }}" alt="Lewis Hamilton" class="driver-image" onerror="this.onerror=null; this.src='{{ url_for('static', filename='images/drivers/default.png') }}'; this.alt='Driver'">
+                <div class="driver-info">
+                    <h3>Lewis Hamilton</h3>
+                    <span class="team-badge">Mercedes</span>
+                </div>
+            </div>
+            <div class="driver-stats">
+                <div class="stat">
+                    <span class="stat-label">Race Starts:</span>
+                    <span class="stat-value">359</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">DNF Rate:</span>
+                    <span class="stat-value">11.4%</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Most Common DNF:</span>
+                    <span class="stat-value">Engine (42%)</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Pole Position DNFs:</span>
+                    <span class="stat-value">4</span>
+                </div>
+                <div class="stat-bar">
+                    <div class="bar-label">Collision Risk</div>
+                    <div class="bar-container">
+                        <div class="bar-fill" style="width: 35%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Max Verstappen -->
+        <div class="driver-card red-bull">
+            <div class="driver-header">
+                <img src="{{ url_for('static', filename='images/drivers/max-verstappen.png') }}" alt="Max Verstappen" class="driver-image" onerror="this.onerror=null; this.src='{{ url_for('static', filename='images/drivers/default.png') }}'; this.alt='Driver'">
+                <div class="driver-info">
+                    <h3>Max Verstappen</h3>
+                    <span class="team-badge">Red Bull</span>
+                </div>
+            </div>
+            <div class="driver-stats">
+                <div class="stat">
+                    <span class="stat-label">Race Starts:</span>
+                    <span class="stat-value">212</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">DNF Rate:</span>
+                    <span class="stat-value">17.9%</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Most Common DNF:</span>
+                    <span class="stat-value">Power Unit (31%)</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Pole Position DNFs:</span>
+                    <span class="stat-value">2</span>
+                </div>
+                <div class="stat-bar">
+                    <div class="bar-label">Collision Risk</div>
+                    <div class="bar-container">
+                        <div class="bar-fill" style="width: 62%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charles Leclerc -->
+        <div class="driver-card ferrari">
+            <div class="driver-header">
+                <img src="{{ url_for('static', filename='images/drivers/charles-leclerc.png') }}" alt="Charles Leclerc" class="driver-image" onerror="this.onerror=null; this.src='{{ url_for('static', filename='images/drivers/default.png') }}'; this.alt='Driver'">
+                <div class="driver-info">
+                    <h3>Charles Leclerc</h3>
+                    <span class="team-badge">Ferrari</span>
+                </div>
+            </div>
+            <div class="driver-stats">
+                <div class="stat">
+                    <span class="stat-label">Race Starts:</span>
+                    <span class="stat-value">150</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">DNF Rate:</span>
+                    <span class="stat-value">16.7%</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Most Common DNF:</span>
+                    <span class="stat-value">Engine (40%)</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Pole Position DNFs:</span>
+                    <span class="stat-value">3</span>
+                </div>
+                <div class="stat-bar">
+                    <div class="bar-label">Collision Risk</div>
+                    <div class="bar-container">
+                        <div class="bar-fill" style="width: 47%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Lando Norris -->
+        <div class="driver-card mclaren">
+            <div class="driver-header">
+                <img src="{{ url_for('static', filename='images/drivers/lando-norris.png') }}" alt="Lando Norris" class="driver-image" onerror="this.onerror=null; this.src='{{ url_for('static', filename='images/drivers/default.png') }}'; this.alt='Driver'">
+                <div class="driver-info">
+                    <h3>Lando Norris</h3>
+                    <span class="team-badge">McLaren</span>
+                </div>
+            </div>
+            <div class="driver-stats">
+                <div class="stat">
+                    <span class="stat-label">Race Starts:</span>
+                    <span class="stat-value">131</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">DNF Rate:</span>
+                    <span class="stat-value">12.2%</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Most Common DNF:</span>
+                    <span class="stat-value">Power Unit (25%)</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Pole Position DNFs:</span>
+                    <span class="stat-value">0</span>
+                </div>
+                <div class="stat-bar">
+                    <div class="bar-label">Collision Risk</div>
+                    <div class="bar-container">
+                        <div class="bar-fill" style="width: 29%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Fernando Alonso -->
+        <div class="driver-card aston-martin">
+            <div class="driver-header">
+                <img src="{{ url_for('static', filename='images/drivers/fernando-alonso.png') }}" alt="Fernando Alonso" class="driver-image" onerror="this.onerror=null; this.src='{{ url_for('static', filename='images/drivers/default.png') }}'; this.alt='Driver'">
+                <div class="driver-info">
+                    <h3>Fernando Alonso</h3>
+                    <span class="team-badge">Aston Martin</span>
+                </div>
+            </div>
+            <div class="driver-stats">
+                <div class="stat">
+                    <span class="stat-label">Race Starts:</span>
+                    <span class="stat-value">405</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">DNF Rate:</span>
+                    <span class="stat-value">14.8%</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Most Common DNF:</span>
+                    <span class="stat-value">Power Unit (37%)</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Pole Position DNFs:</span>
+                    <span class="stat-value">1</span>
+                </div>
+                <div class="stat-bar">
+                    <div class="bar-label">Collision Risk</div>
+                    <div class="bar-container">
+                        <div class="bar-fill" style="width: 33%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Carlos Sainz -->
+        <div class="driver-card ferrari">
+            <div class="driver-header">
+                <img src="{{ url_for('static', filename='images/drivers/carlos-sainz.png') }}" alt="Carlos Sainz" class="driver-image" onerror="this.onerror=null; this.src='{{ url_for('static', filename='images/drivers/default.png') }}'; this.alt='Driver'">
+                <div class="driver-info">
+                    <h3>Carlos Sainz</h3>
+                    <span class="team-badge">Ferrari</span>
+                </div>
+            </div>
+            <div class="driver-stats">
+                <div class="stat">
+                    <span class="stat-label">Race Starts:</span>
+                    <span class="stat-value">209</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">DNF Rate:</span>
+                    <span class="stat-value">18.7%</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Most Common DNF:</span>
+                    <span class="stat-value">Collision (50%)</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Pole Position DNFs:</span>
+                    <span class="stat-value">1</span>
+                </div>
+                <div class="stat-bar">
+                    <div class="bar-label">Collision Risk</div>
+                    <div class="bar-container">
+                        <div class="bar-fill" style="width: 65%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- George Russell -->
+        <div class="driver-card mercedes">
+            <div class="driver-header">
+                <img src="{{ url_for('static', filename='images/drivers/george-russell.png') }}" alt="George Russell" class="driver-image" onerror="this.onerror=null; this.src='{{ url_for('static', filename='images/drivers/default.png') }}'; this.alt='Driver'">
+                <div class="driver-info">
+                    <h3>George Russell</h3>
+                    <span class="team-badge">Mercedes</span>
+                </div>
+            </div>
+            <div class="driver-stats">
+                <div class="stat">
+                    <span class="stat-label">Race Starts:</span>
+                    <span class="stat-value">131</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">DNF Rate:</span>
+                    <span class="stat-value">15.3%</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Most Common DNF:</span>
+                    <span class="stat-value">Engine (35%)</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Pole Position DNFs:</span>
+                    <span class="stat-value">1</span>
+                </div>
+                <div class="stat-bar">
+                    <div class="bar-label">Collision Risk</div>
+                    <div class="bar-container">
+                        <div class="bar-fill" style="width: 42%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sergio Perez -->
+        <div class="driver-card red-bull">
+            <div class="driver-header">
+                <img src="{{ url_for('static', filename='images/drivers/sergio-perez.png') }}" alt="Sergio Perez" class="driver-image" onerror="this.onerror=null; this.src='{{ url_for('static', filename='images/drivers/default.png') }}'; this.alt='Driver'">
+                <div class="driver-info">
+                    <h3>Sergio Perez</h3>
+                    <span class="team-badge">Red Bull</span>
+                </div>
+            </div>
+            <div class="driver-stats">
+                <div class="stat">
+                    <span class="stat-label">Race Starts:</span>
+                    <span class="stat-value">281</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">DNF Rate:</span>
+                    <span class="stat-value">16.0%</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Most Common DNF:</span>
+                    <span class="stat-value">Collision (45%)</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Pole Position DNFs:</span>
+                    <span class="stat-value">0</span>
+                </div>
+                <div class="stat-bar">
+                    <div class="bar-label">Collision Risk</div>
+                    <div class="bar-container">
+                        <div class="bar-fill" style="width: 55%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Oscar Piastri -->
+        <div class="driver-card mclaren">
+            <div class="driver-header">
+                <img src="{{ url_for('static', filename='images/drivers/oscar-piastri.png') }}" alt="Oscar Piastri" class="driver-image" onerror="this.onerror=null; this.src='{{ url_for('static', filename='images/drivers/default.png') }}'; this.alt='Driver'">
+                <div class="driver-info">
+                    <h3>Oscar Piastri</h3>
+                    <span class="team-badge">McLaren</span>
+                </div>
+            </div>
+            <div class="driver-stats">
+                <div class="stat">
+                    <span class="stat-label">Race Starts:</span>
+                    <span class="stat-value">48</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">DNF Rate:</span>
+                    <span class="stat-value">12.5%</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Most Common DNF:</span>
+                    <span class="stat-value">Collision (33%)</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Pole Position DNFs:</span>
+                    <span class="stat-value">0</span>
+                </div>
+                <div class="stat-bar">
+                    <div class="bar-label">Collision Risk</div>
+                    <div class="bar-container">
+                        <div class="bar-fill" style="width: 38%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Lance Stroll -->
+        <div class="driver-card aston-martin">
+            <div class="driver-header">
+                <img src="{{ url_for('static', filename='images/drivers/lance-stroll.png') }}" alt="Lance Stroll" class="driver-image" onerror="this.onerror=null; this.src='{{ url_for('static', filename='images/drivers/default.png') }}'; this.alt='Driver'">
+                <div class="driver-info">
+                    <h3>Lance Stroll</h3>
+                    <span class="team-badge">Aston Martin</span>
+                </div>
+            </div>
+            <div class="driver-stats">
+                <div class="stat">
+                    <span class="stat-label">Race Starts:</span>
+                    <span class="stat-value">162</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">DNF Rate:</span>
+                    <span class="stat-value">19.1%</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Most Common DNF:</span>
+                    <span class="stat-value">Collision (58%)</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Pole Position DNFs:</span>
+                    <span class="stat-value">0</span>
+                </div>
+                <div class="stat-bar">
+                    <div class="bar-label">Collision Risk</div>
+                    <div class="bar-container">
+                        <div class="bar-fill" style="width: 61%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Esteban Ocon -->
+        <div class="driver-card alpine">
+            <div class="driver-header">
+                <img src="{{ url_for('static', filename='images/drivers/esteban-ocon.png') }}" alt="Esteban Ocon" class="driver-image" onerror="this.onerror=null; this.src='{{ url_for('static', filename='images/drivers/default.png') }}'; this.alt='Driver'">
+                <div class="driver-info">
+                    <h3>Esteban Ocon</h3>
+                    <span class="team-badge">Alpine</span>
+                </div>
+            </div>
+            <div class="driver-stats">
+                <div class="stat">
+                    <span class="stat-label">Race Starts:</span>
+                    <span class="stat-value">153</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">DNF Rate:</span>
+                    <span class="stat-value">16.3%</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Most Common DNF:</span>
+                    <span class="stat-value">Mechanical (44%)</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Pole Position DNFs:</span>
+                    <span class="stat-value">0</span>
+                </div>
+                <div class="stat-bar">
+                    <div class="bar-label">Collision Risk</div>
+                    <div class="bar-container">
+                        <div class="bar-fill" style="width: 52%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pierre Gasly -->
+        <div class="driver-card alpine">
+            <div class="driver-header">
+                <img src="{{ url_for('static', filename='images/drivers/pierre-gasly.png') }}" alt="Pierre Gasly" class="driver-image" onerror="this.onerror=null; this.src='{{ url_for('static', filename='images/drivers/default.png') }}'; this.alt='Driver'">
+                <div class="driver-info">
+                    <h3>Pierre Gasly</h3>
+                    <span class="team-badge">Alpine</span>
+                </div>
+            </div>
+            <div class="driver-stats">
+                <div class="stat">
+                    <span class="stat-label">Race Starts:</span>
+                    <span class="stat-value">150</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">DNF Rate:</span>
+                    <span class="stat-value">14.0%</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Most Common DNF:</span>
+                    <span class="stat-value">Power Unit (38%)</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Pole Position DNFs:</span>
+                    <span class="stat-value">0</span>
+                </div>
+                <div class="stat-bar">
+                    <div class="bar-label">Collision Risk</div>
+                    <div class="bar-container">
+                        <div class="bar-fill" style="width: 40%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Alexander Albon -->
+        <div class="driver-card williams">
+            <div class="driver-header">
+                <img src="{{ url_for('static', filename='images/drivers/alexander-albon.png') }}" alt="Alexander Albon" class="driver-image" onerror="this.onerror=null; this.src='{{ url_for('static', filename='images/drivers/default.png') }}'; this.alt='Driver'">
+                <div class="driver-info">
+                    <h3>Alexander Albon</h3>
+                    <span class="team-badge">Williams</span>
+                </div>
+            </div>
+            <div class="driver-stats">
+                <div class="stat">
+                    <span class="stat-label">Race Starts:</span>
+                    <span class="stat-value">97</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">DNF Rate:</span>
+                    <span class="stat-value">13.4%</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Most Common DNF:</span>
+                    <span class="stat-value">Collision (46%)</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Pole Position DNFs:</span>
+                    <span class="stat-value">0</span>
+                </div>
+                <div class="stat-bar">
+                    <div class="bar-label">Collision Risk</div>
+                    <div class="bar-container">
+                        <div class="bar-fill" style="width: 49%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Logan Sargeant -->
+        <div class="driver-card williams">
+            <div class="driver-header">
+                <img src="{{ url_for('static', filename='images/drivers/logan-sargeant.png') }}" alt="Logan Sargeant" class="driver-image" onerror="this.onerror=null; this.src='{{ url_for('static', filename='images/drivers/default.png') }}'; this.alt='Driver'">
+                <div class="driver-info">
+                    <h3>Logan Sargeant</h3>
+                    <span class="team-badge">Williams</span>
+                </div>
+            </div>
+            <div class="driver-stats">
+                <div class="stat">
+                    <span class="stat-label">Race Starts:</span>
+                    <span class="stat-value">42</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">DNF Rate:</span>
+                    <span class="stat-value">21.4%</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Most Common DNF:</span>
+                    <span class="stat-value">Collision (55%)</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Pole Position DNFs:</span>
+                    <span class="stat-value">0</span>
+                </div>
+                <div class="stat-bar">
+                    <div class="bar-label">Collision Risk</div>
+                    <div class="bar-container">
+                        <div class="bar-fill" style="width: 74%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Daniel Ricciardo -->
+        <div class="driver-card rb">
+            <div class="driver-header">
+                <img src="{{ url_for('static', filename='images/drivers/daniel-ricciardo.png') }}" alt="Daniel Ricciardo" class="driver-image" onerror="this.onerror=null; this.src='{{ url_for('static', filename='images/drivers/default.png') }}'; this.alt='Driver'">
+                <div class="driver-info">
+                    <h3>Daniel Ricciardo</h3>
+                    <span class="team-badge">RB</span>
+                </div>
+            </div>
+            <div class="driver-stats">
+                <div class="stat">
+                    <span class="stat-label">Race Starts:</span>
+                    <span class="stat-value">252</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">DNF Rate:</span>
+                    <span class="stat-value">15.9%</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Most Common DNF:</span>
+                    <span class="stat-value">Power Unit (42%)</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Pole Position DNFs:</span>
+                    <span class="stat-value">1</span>
+                </div>
+                <div class="stat-bar">
+                    <div class="bar-label">Collision Risk</div>
+                    <div class="bar-container">
+                        <div class="bar-fill" style="width: 36%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Yuki Tsunoda -->
+        <div class="driver-card rb">
+            <div class="driver-header">
+                <img src="{{ url_for('static', filename='images/drivers/yuki-tsunoda.png') }}" alt="Yuki Tsunoda" class="driver-image" onerror="this.onerror=null; this.src='{{ url_for('static', filename='images/drivers/default.png') }}'; this.alt='Driver'">
+                <div class="driver-info">
+                    <h3>Yuki Tsunoda</h3>
+                    <span class="team-badge">RB</span>
+                </div>
+            </div>
+            <div class="driver-stats">
+                <div class="stat">
+                    <span class="stat-label">Race Starts:</span>
+                    <span class="stat-value">84</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">DNF Rate:</span>
+                    <span class="stat-value">19.0%</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Most Common DNF:</span>
+                    <span class="stat-value">Collision (38%)</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Pole Position DNFs:</span>
+                    <span class="stat-value">0</span>
+                </div>
+                <div class="stat-bar">
+                    <div class="bar-label">Collision Risk</div>
+                    <div class="bar-container">
+                        <div class="bar-fill" style="width: 59%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Nico Hulkenberg -->
+        <div class="driver-card haas">
+            <div class="driver-header">
+                <img src="{{ url_for('static', filename='images/drivers/nico-hulkenberg.png') }}" alt="Nico Hulkenberg" class="driver-image" onerror="this.onerror=null; this.src='{{ url_for('static', filename='images/drivers/default.png') }}'; this.alt='Driver'">
+                <div class="driver-info">
+                    <h3>Nico Hulkenberg</h3>
+                    <span class="team-badge">Haas</span>
+                </div>
+            </div>
+            <div class="driver-stats">
+                <div class="stat">
+                    <span class="stat-label">Race Starts:</span>
+                    <span class="stat-value">214</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">DNF Rate:</span>
+                    <span class="stat-value">14.5%</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Most Common DNF:</span>
+                    <span class="stat-value">Engine (39%)</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Pole Position DNFs:</span>
+                    <span class="stat-value">0</span>
+                </div>
+                <div class="stat-bar">
+                    <div class="bar-label">Collision Risk</div>
+                    <div class="bar-container">
+                        <div class="bar-fill" style="width: 41%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Kevin Magnussen -->
+        <div class="driver-card haas">
+            <div class="driver-header">
+                <img src="{{ url_for('static', filename='images/drivers/kevin-magnussen.png') }}" alt="Kevin Magnussen" class="driver-image" onerror="this.onerror=null; this.src='{{ url_for('static', filename='images/drivers/default.png') }}'; this.alt='Driver'">
+                <div class="driver-info">
+                    <h3>Kevin Magnussen</h3>
+                    <span class="team-badge">Haas</span>
+                </div>
+            </div>
+            <div class="driver-stats">
+                <div class="stat">
+                    <span class="stat-label">Race Starts:</span>
+                    <span class="stat-value">177</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">DNF Rate:</span>
+                    <span class="stat-value">16.9%</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Most Common DNF:</span>
+                    <span class="stat-value">Collision (47%)</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Pole Position DNFs:</span>
+                    <span class="stat-value">0</span>
+                </div>
+                <div class="stat-bar">
+                    <div class="bar-label">Collision Risk</div>
+                    <div class="bar-container">
+                        <div class="bar-fill" style="width: 68%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Valtteri Bottas -->
+        <div class="driver-card sauber">
+            <div class="driver-header">
+                <img src="{{ url_for('static', filename='images/drivers/valtteri-bottas.png') }}" alt="Valtteri Bottas" class="driver-image" onerror="this.onerror=null; this.src='{{ url_for('static', filename='images/drivers/default.png') }}'; this.alt='Driver'">
+                <div class="driver-info">
+                    <h3>Valtteri Bottas</h3>
+                    <span class="team-badge">Sauber</span>
+                </div>
+            </div>
+            <div class="driver-stats">
+                <div class="stat">
+                    <span class="stat-label">Race Starts:</span>
+                    <span class="stat-value">231</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">DNF Rate:</span>
+                    <span class="stat-value">12.1%</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Most Common DNF:</span>
+                    <span class="stat-value">Engine (36%)</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Pole Position DNFs:</span>
+                    <span class="stat-value">1</span>
+                </div>
+                <div class="stat-bar">
+                    <div class="bar-label">Collision Risk</div>
+                    <div class="bar-container">
+                        <div class="bar-fill" style="width: 32%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Guanyu Zhou -->
+        <div class="driver-card sauber">
+            <div class="driver-header">
+                <img src="{{ url_for('static', filename='images/drivers/guanyu-zhou.png') }}" alt="Guanyu Zhou" class="driver-image" onerror="this.onerror=null; this.src='{{ url_for('static', filename='images/drivers/default.png') }}'; this.alt='Driver'">
+                <div class="driver-info">
+                    <h3>Guanyu Zhou</h3>
+                    <span class="team-badge">Sauber</span>
+                </div>
+            </div>
+            <div class="driver-stats">
+                <div class="stat">
+                    <span class="stat-label">Race Starts:</span>
+                    <span class="stat-value">67</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">DNF Rate:</span>
+                    <span class="stat-value">17.9%</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Most Common DNF:</span>
+                    <span class="stat-value">Power Unit (33%)</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Pole Position DNFs:</span>
+                    <span class="stat-value">0</span>
+                </div>
+                <div class="stat-bar">
+                    <div class="bar-label">Collision Risk</div>
+                    <div class="bar-container">
+                        <div class="bar-fill" style="width: 45%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="dashboard-footer">
+        <p>Data based on F1 race statistics from 2015-2024 seasons</p>
+    </div>
+</body>
+</html> 

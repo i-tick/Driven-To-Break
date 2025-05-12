@@ -24,8 +24,6 @@ def load_datasets():
         # Select the bottom 100 rows
         bottom_1000 = races_race_df[(races_race_df['year'] >= 2015) & (races_race_df['year'] <= 2025)]
 
-
-        
         # Delete columns with any empty values
         bottom_1000.dropna(axis=1, how='any', inplace=True)
         
@@ -98,10 +96,11 @@ def get_circuit_data():
         processed_circuits = []
         for circuit in circuits_by_location.values():
             # circuit['dnfPercentage'] = (circuit['dnfCount'] / (grand_prix_counts[circuit['grandPrixId']]*20) * 100) if circuit['totalRaces'] > 0 else 0
-            if circuit['country'] in grand_prix_counts:
-                circuit['dnfPercentage'] = (circuit['dnfCount'] / (grand_prix_counts[circuit['grandPrixId']]*20) * 100) if circuit['totalRaces'] > 0 else 0
+            if circuit['grandPrixId'] in grand_prix_counts:
+                circuit['dnfPercentage'] = (circuit['dnfCount'] / (grand_prix_counts[circuit['grandPrixId']]*20) * 100) if grand_prix_counts[circuit['grandPrixId']] > 0 else 0
             else:
                 # Default to using totalRaces if the grandPrixId is not found in grand_prix_counts
+                print('Aitik')
                 circuit['dnfPercentage'] = (circuit['dnfCount'] / circuit['totalRaces'] * 100) if circuit['totalRaces'] > 0 else 0
             circuit['topReasons'] = sorted(
                 [(reason, count) for reason, count in circuit['dnfReasons'].items()],
@@ -216,6 +215,8 @@ def get_team_reliability():
         
         # Filter data based on parameters
         if season and season != 'all':
+            
+
             circuit_data = [d for d in circuit_data if str(d['year']) == season]
         if team and team != 'all':
             circuit_data = [d for d in circuit_data if d['constructorId'] == team]

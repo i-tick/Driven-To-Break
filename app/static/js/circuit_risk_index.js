@@ -161,7 +161,6 @@ function initCircuitRiskIndex() {
             .attr("opacity", 0.85)
             .attr("class", d => {
                 const className = `circuit-point ${d.circuitType}`;
-                console.log(`Assigning class: ${className} to circuit: ${d.circuitName}`);
                 return className;
             })
             .on("mouseover", function(event, d) {

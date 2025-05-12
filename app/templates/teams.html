@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>F1 Teams Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <script src="{{ url_for('static', filename='d3/d3.min.js') }}" defer></script>
+    <script src="{{ url_for('static', filename='js/teams.js') }}" defer></script>
+</head>
+<body class="visualization-page">
+    <header class="dashboard-header">
+        <img src="https://www.formula1.com/etc/designs/fom-website/images/f1_logo.svg" alt="Formula 1 Logo" class="f1-logo-small">
+        <h1>F1 Team Analytics</h1>
+        <nav>
+            <ul>
+                <li><a href="{{ url_for('main.index') }}">Home</a></li>
+                <li><a href="{{ url_for('main.visualizations') }}">Visualizations</a></li>
+                <li><a href="{{ url_for('main.teams') }}" class="active">Teams</a></li>
+                <li><a href="{{ url_for('main.drivers') }}">Drivers</a></li>
+            </ul>
+        </nav>
+    </header>
+    
+    <div class="filter-container">
+        <select id="team-era-filter">
+            <option value="all">All Eras</option>
+            <option value="current">Current Teams</option>
+            <option value="recent">Recent Teams</option>
+            <option value="historical">Historical Teams</option>
+        </select>
+    </div>
+
+    <div class="team-grid">
+        <!-- Current Era Teams -->
+        <!-- Mercedes -->
+        <div class="team-card mercedes current-era">
+            <div class="team-header">
+                <img src="{{ url_for('static', filename='images/teams/mercedes.png') }}" 
+                     alt="Mercedes Logo" 
+                     class="team-logo"
+                     onerror="this.onerror=null; this.src='{{ url_for('static', filename='images/teams/default.png') }}'; this.alt='Team Logo';">
+                <h3>Mercedes-AMG Petronas F1 Team</h3>
+            </div>
+            <div class="team-stats">
+                <div class="stat">
+                    <span class="stat-label">DNF Rate:</span>
+                    <span class="stat-value">16.2%</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Most Common Failure:</span>
+                    <span class="stat-value">Power Unit</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Reliability Rank:</span>
+                    <span class="stat-value">3rd</span>
+                </div>
+            </div>
+            <div class="team-chart-container"></div>
+        </div>
+
+        <!-- Red Bull -->
+        <div class="team-card red-bull current-era">
+            <div class="team-header">
+                <img src="{{ url_for('static', filename='images/teams/red-bull.png') }}" 
+                     alt="Red Bull Logo" 
+                     class="team-logo"
+                     onerror="this.onerror=null; this.src='{{ url_for('static', filename='images/teams/default.png') }}'; this.alt='Team Logo';">
+                <h3>Oracle Red Bull Racing</h3>
+            </div>
+            <div class="team-stats">
+                <div class="stat">
+                    <span class="stat-label">DNF Rate:</span>
+                    <span class="stat-value">18.5%</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Most Common Failure:</span>
+                    <span class="stat-value">Power Unit</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Reliability Rank:</span>
+                    <span class="stat-value">4th</span>
+                </div>
+            </div>
+            <div class="team-chart-container"></div>
+        </div>
+
+        <!-- Ferrari -->
+        <div class="team-card ferrari current-era">
+            <div class="team-header">
+                <img src="{{ url_for('static', filename='images/teams/ferrari.png') }}" 
+                     alt="Ferrari Logo" 
+                     class="team-logo"
+                     onerror="this.onerror=null; this.src='{{ url_for('static', filename='images/teams/default.png') }}'; this.alt='Team Logo';">
+                <h3>Scuderia Ferrari</h3>
+            </div>
+            <div class="team-stats">
+                <div class="stat">
+                    <span class="stat-label">DNF Rate:</span>
+                    <span class="stat-value">14.8%</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Most Common Failure:</span>
+                    <span class="stat-value">Engine</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Reliability Rank:</span>
+                    <span class="stat-value">2nd</span>
+                </div>
+            </div>
+            <div class="team-chart-container"></div>
+        </div>
+
+        <!-- McLaren -->
+        <div class="team-card mclaren current-era">
+            <div class="team-header">
+                <img src="{{ url_for('static', filename='images/teams/mclaren.png') }}" 
+                     alt="McLaren Logo" 
+                     class="team-logo"
+                     onerror="this.onerror=null; this.src='{{ url_for('static', filename='images/teams/default.png') }}'; this.alt='Team Logo';">
+                <h3>McLaren F1 Team</h3>
+            </div>
+            <div class="team-stats">
+                <div class="stat">
+                    <span class="stat-label">DNF Rate:</span>
+                    <span class="stat-value">13.2%</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Most Common Failure:</span>
+                    <span class="stat-value">Gearbox</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Reliability Rank:</span>
+                    <span class="stat-value">1st</span>
+                </div>
+            </div>
+            <div class="team-chart-container"></div>
+        </div>
+
+        <!-- Alpine -->
+        <div class="team-card alpine current-era">
+            <div class="team-header">
+                <img src="{{ url_for('static', filename='images/teams/alpine.png') }}" 
+                     alt="Alpine Logo" 
+                     class="team-logo"
+                     onerror="this.onerror=null; this.src='{{ url_for('static', filename='images/teams/default.png') }}'; this.alt='Team Logo';">
+                <h3>BWT Alpine F1 Team</h3>
+            </div>
+            <div class="team-stats">
+                <div class="stat">
+                    <span class="stat-label">DNF Rate:</span>
+                    <span class="stat-value">19.3%</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Most Common Failure:</span>
+                    <span class="stat-value">Renault Power Unit</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Reliability Rank:</span>
+                    <span class="stat-value">6th</span>
+                </div>
+            </div>
+            <div class="team-chart-container"></div>
+        </div>
+
+        <!-- Aston Martin -->
+        <div class="team-card aston-martin current-era">
+            <div class="team-header">
+                <img src="{{ url_for('static', filename='images/teams/aston-martin.png') }}" 
+                     alt="Aston Martin Logo" 
+                     class="team-logo"
+                     onerror="this.onerror=null; this.src='{{ url_for('static', filename='images/teams/default.png') }}'; this.alt='Team Logo';">
+                <h3>Aston Martin Aramco F1 Team</h3>
+            </div>
+            <div class="team-stats">
+                <div class="stat">
+                    <span class="stat-label">DNF Rate:</span>
+                    <span class="stat-value">17.1%</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Most Common Failure:</span>
+                    <span class="stat-value">Water Pressure</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Reliability Rank:</span>
+                    <span class="stat-value">5th</span>
+                </div>
+            </div>
+            <div class="team-chart-container"></div>
+        </div>
+        
+        <!-- Williams -->
+        <div class="team-card williams current-era">
+            <div class="team-header">
+                <img src="{{ url_for('static', filename='images/teams/williams.png') }}" 
+                     alt="Williams Logo" 
+                     class="team-logo"
+                     onerror="this.onerror=null; this.src='{{ url_for('static', filename='images/teams/default.png') }}'; this.alt='Team Logo';">
+                <h3>Williams Racing</h3>
+            </div>
+            <div class="team-stats">
+                <div class="stat">
+                    <span class="stat-label">DNF Rate:</span>
+                    <span class="stat-value">15.7%</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Most Common Failure:</span>
+                    <span class="stat-value">Mercedes Power Unit</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Reliability Rank:</span>
+                    <span class="stat-value">7th</span>
+                </div>
+            </div>
+            <div class="team-chart-container"></div>
+        </div>
+        
+        <!-- RB -->
+        <div class="team-card rb current-era">
+            <div class="team-header">
+                <img src="{{ url_for('static', filename='images/teams/rb.png') }}" 
+                     alt="RB Logo" 
+                     class="team-logo"
+                     onerror="this.onerror=null; this.src='{{ url_for('static', filename='images/teams/default.png') }}'; this.alt='Team Logo';">
+                <h3>Visa Cash App RB F1 Team</h3>
+            </div>
+            <div class="team-stats">
+                <div class="stat">
+                    <span class="stat-label">DNF Rate:</span>
+                    <span class="stat-value">21.2%</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Most Common Failure:</span>
+                    <span class="stat-value">Honda Power Unit</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Reliability Rank:</span>
+                    <span class="stat-value">9th</span>
+                </div>
+            </div>
+            <div class="team-chart-container"></div>
+        </div>
+        
+        <!-- Kick Sauber -->
+        <div class="team-card kick-sauber current-era">
+            <div class="team-header">
+                <img src="{{ url_for('static', filename='images/teams/kick-sauber.png') }}" 
+                     alt="Kick Sauber Logo" 
+                     class="team-logo"
+                     onerror="this.onerror=null; this.src='{{ url_for('static', filename='images/teams/default.png') }}'; this.alt='Team Logo';">
+                <h3>Stake F1 Team Kick Sauber</h3>
+            </div>
+            <div class="team-stats">
+                <div class="stat">
+                    <span class="stat-label">DNF Rate:</span>
+                    <span class="stat-value">20.1%</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Most Common Failure:</span>
+                    <span class="stat-value">Ferrari Power Unit</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Reliability Rank:</span>
+                    <span class="stat-value">8th</span>
+                </div>
+            </div>
+            <div class="team-chart-container"></div>
+        </div>
+        
+        <!-- Haas -->
+        <div class="team-card haas current-era">
+            <div class="team-header">
+                <img src="{{ url_for('static', filename='images/teams/haas.png') }}" 
+                     alt="Haas Logo" 
+                     class="team-logo"
+                     onerror="this.onerror=null; this.src='{{ url_for('static', filename='images/teams/default.png') }}'; this.alt='Team Logo';">
+                <h3>MoneyGram Haas F1 Team</h3>
+            </div>
+            <div class="team-stats">
+                <div class="stat">
+                    <span class="stat-label">DNF Rate:</span>
+                    <span class="stat-value">23.4%</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Most Common Failure:</span>
+                    <span class="stat-value">Ferrari Power Unit</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Reliability Rank:</span>
+                    <span class="stat-value">10th</span>
+                </div>
+            </div>
+            <div class="team-chart-container"></div>
+        </div>
+        
+        <!-- Recent Era Teams -->
+        <!-- AlphaTauri -->
+        <div class="team-card alphatauri recent-era">
+            <div class="team-header">
+                <img src="{{ url_for('static', filename='images/teams/alphatauri.png') }}" 
+                     alt="AlphaTauri Logo" 
+                     class="team-logo"
+                     onerror="this.onerror=null; this.src='{{ url_for('static', filename='images/teams/default.png') }}'; this.alt='Team Logo';">
+                <h3>Scuderia AlphaTauri</h3>
+            </div>
+            <div class="team-stats">
+                <div class="stat">
+                    <span class="stat-label">DNF Rate:</span>
+                    <span class="stat-value">19.5%</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Most Common Failure:</span>
+                    <span class="stat-value">Honda Power Unit</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Active Years:</span>
+                    <span class="stat-value">2020-2023</span>
+                </div>
+            </div>
+            <div class="team-chart-container"></div>
+        </div>
+        
+        <!-- Alfa Romeo -->
+        <div class="team-card alfa-romeo recent-era">
+            <div class="team-header">
+                <img src="{{ url_for('static', filename='images/teams/alfa-romeo.png') }}" 
+                     alt="Alfa Romeo Logo" 
+                     class="team-logo"
+                     onerror="this.onerror=null; this.src='{{ url_for('static', filename='images/teams/default.png') }}'; this.alt='Team Logo';">
+                <h3>Alfa Romeo F1 Team</h3>
+            </div>
+            <div class="team-stats">
+                <div class="stat">
+                    <span class="stat-label">DNF Rate:</span>
+                    <span class="stat-value">18.2%</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Most Common Failure:</span>
+                    <span class="stat-value">Ferrari Power Unit</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Active Years:</span>
+                    <span class="stat-value">2019-2023</span>
+                </div>
+            </div>
+            <div class="team-chart-container"></div>
+        </div>
+        
+        <!-- Racing Point -->
+        <div class="team-card racing-point recent-era">
+            <div class="team-header">
+                <img src="{{ url_for('static', filename='images/teams/racing-point.png') }}" 
+                     alt="Racing Point Logo" 
+                     class="team-logo"
+                     onerror="this.onerror=null; this.src='{{ url_for('static', filename='images/teams/default.png') }}'; this.alt='Team Logo';">
+                <h3>BWT Racing Point F1 Team</h3>
+            </div>
+            <div class="team-stats">
+                <div class="stat">
+                    <span class="stat-label">DNF Rate:</span>
+                    <span class="stat-value">16.4%</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Most Common Failure:</span>
+                    <span class="stat-value">Mercedes Power Unit</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Active Years:</span>
+                    <span class="stat-value">2019-2020</span>
+                </div>
+            </div>
+            <div class="team-chart-container"></div>
+        </div>
+        
+        <!-- Renault -->
+        <div class="team-card renault recent-era">
+            <div class="team-header">
+                <img src="{{ url_for('static', filename='images/teams/renault.png') }}" 
+                     alt="Renault Logo" 
+                     class="team-logo"
+                     onerror="this.onerror=null; this.src='{{ url_for('static', filename='images/teams/default.png') }}'; this.alt='Team Logo';">
+                <h3>Renault DP World F1 Team</h3>
+            </div>
+            <div class="team-stats">
+                <div class="stat">
+                    <span class="stat-label">DNF Rate:</span>
+                    <span class="stat-value">20.9%</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Most Common Failure:</span>
+                    <span class="stat-value">Renault Power Unit</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Active Years:</span>
+                    <span class="stat-value">2016-2020</span>
+                </div>
+            </div>
+            <div class="team-chart-container"></div>
+        </div>
+        
+        <!-- Historical Era Teams -->
+        <!-- Toro Rosso -->
+        <div class="team-card toro-rosso historical-era">
+            <div class="team-header">
+                <img src="{{ url_for('static', filename='images/teams/toro-rosso.png') }}" 
+                     alt="Toro Rosso Logo" 
+                     class="team-logo"
+                     onerror="this.onerror=null; this.src='{{ url_for('static', filename='images/teams/default.png') }}'; this.alt='Team Logo';">
+                <h3>Scuderia Toro Rosso</h3>
+            </div>
+            <div class="team-stats">
+                <div class="stat">
+                    <span class="stat-label">DNF Rate:</span>
+                    <span class="stat-value">25.6%</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Most Common Failure:</span>
+                    <span class="stat-value">Engine</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Active Years:</span>
+                    <span class="stat-value">2006-2019</span>
+                </div>
+            </div>
+            <div class="team-chart-container"></div>
+        </div>
+        
+        <!-- Force India -->
+        <div class="team-card force-india historical-era">
+            <div class="team-header">
+                <img src="{{ url_for('static', filename='images/teams/force-india.png') }}" 
+                     alt="Force India Logo" 
+                     class="team-logo"
+                     onerror="this.onerror=null; this.src='{{ url_for('static', filename='images/teams/default.png') }}'; this.alt='Team Logo';">
+                <h3>Sahara Force India F1 Team</h3>
+            </div>
+            <div class="team-stats">
+                <div class="stat">
+                    <span class="stat-label">DNF Rate:</span>
+                    <span class="stat-value">17.3%</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Most Common Failure:</span>
+                    <span class="stat-value">Mercedes Power Unit</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Active Years:</span>
+                    <span class="stat-value">2008-2018</span>
+                </div>
+            </div>
+            <div class="team-chart-container"></div>
+        </div>
+        
+        <!-- Sauber -->
+        <div class="team-card sauber historical-era">
+            <div class="team-header">
+                <img src="{{ url_for('static', filename='images/teams/sauber.png') }}" 
+                     alt="Sauber Logo" 
+                     class="team-logo"
+                     onerror="this.onerror=null; this.src='{{ url_for('static', filename='images/teams/default.png') }}'; this.alt='Team Logo';">
+                <h3>Sauber F1 Team</h3>
+            </div>
+            <div class="team-stats">
+                <div class="stat">
+                    <span class="stat-label">DNF Rate:</span>
+                    <span class="stat-value">22.7%</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Most Common Failure:</span>
+                    <span class="stat-value">Ferrari Power Unit</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Active Years:</span>
+                    <span class="stat-value">1993-2018</span>
+                </div>
+            </div>
+            <div class="team-chart-container"></div>
+        </div>
+        
+        <!-- Lotus F1 -->
+        <div class="team-card lotus-f1 historical-era">
+            <div class="team-header">
+                <img src="{{ url_for('static', filename='images/teams/lotus-f1.png') }}" 
+                     alt="Lotus F1 Logo" 
+                     class="team-logo"
+                     onerror="this.onerror=null; this.src='{{ url_for('static', filename='images/teams/default.png') }}'; this.alt='Team Logo';">
+                <h3>Lotus F1 Team</h3>
+            </div>
+            <div class="team-stats">
+                <div class="stat">
+                    <span class="stat-label">DNF Rate:</span>
+                    <span class="stat-value">21.9%</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Most Common Failure:</span>
+                    <span class="stat-value">Renault Engine</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Active Years:</span>
+                    <span class="stat-value">2012-2015</span>
+                </div>
+            </div>
+            <div class="team-chart-container"></div>
+        </div>
+        
+        <!-- Manor -->
+        <div class="team-card manor historical-era">
+            <div class="team-header">
+                <img src="{{ url_for('static', filename='images/teams/manor.png') }}" 
+                     alt="Manor Logo" 
+                     class="team-logo"
+                     onerror="this.onerror=null; this.src='{{ url_for('static', filename='images/teams/default.png') }}'; this.alt='Team Logo';">
+                <h3>Manor Racing</h3>
+            </div>
+            <div class="team-stats">
+                <div class="stat">
+                    <span class="stat-label">DNF Rate:</span>
+                    <span class="stat-value">28.4%</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Most Common Failure:</span>
+                    <span class="stat-value">Mercedes Engine</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Active Years:</span>
+                    <span class="stat-value">2016</span>
+                </div>
+            </div>
+            <div class="team-chart-container"></div>
+        </div>
+        
+        <!-- Marussia -->
+        <div class="team-card marussia historical-era">
+            <div class="team-header">
+                <img src="{{ url_for('static', filename='images/teams/marussia.png') }}" 
+                     alt="Marussia Logo" 
+                     class="team-logo"
+                     onerror="this.onerror=null; this.src='{{ url_for('static', filename='images/teams/default.png') }}'; this.alt='Team Logo';">
+                <h3>Marussia F1 Team</h3>
+            </div>
+            <div class="team-stats">
+                <div class="stat">
+                    <span class="stat-label">DNF Rate:</span>
+                    <span class="stat-value">30.2%</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Most Common Failure:</span>
+                    <span class="stat-value">Ferrari Engine</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-label">Active Years:</span>
+                    <span class="stat-value">2012-2015</span>
+                </div>
+            </div>
+            <div class="team-chart-container"></div>
+        </div>
+    </div>
+
+    <div class="dashboard-footer">
+        <p>Data based on F1 race statistics from 2015-2024 seasons</p>
+    </div>
+    
+    <script>
+        // Team era filtering functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const eraFilter = document.getElementById('team-era-filter');
+            const teamCards = document.querySelectorAll('.team-card');
+            
+            eraFilter.addEventListener('change', function() {
+                const selectedEra = eraFilter.value;
+                
+                teamCards.forEach(card => {
+                    if (selectedEra === 'all') {
+                        card.style.display = '';
+                    } else if (card.classList.contains(selectedEra + '-era')) {
+                        card.style.display = '';
+                    } else {
+                        card.style.display = 'none';
+                    }
+                });
+            });
+            
+            // Initialize with all teams showing
+            if (eraFilter.value === 'all') {
+                teamCards.forEach(card => {
+                    card.style.display = '';
+                });
+            } else {
+                // Only show the selected era
+                const selectedEra = eraFilter.value;
+                teamCards.forEach(card => {
+                    if (card.classList.contains(selectedEra + '-era')) {
+                        card.style.display = '';
+                    } else {
+                        card.style.display = 'none';
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html> 

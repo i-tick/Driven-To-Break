@@ -24,9 +24,9 @@
         <nav>
             <ul>
                 <li><a href="{{ url_for('main.index') }}">Home</a></li>
-                <li><a href="#">Teams</a></li>
-                <li><a href="#">Drivers</a></li>
-                <li><a href="#">Settings</a></li>
+                <li><a href="{{ url_for('main.visualizations') }}" class="active">Visualizations</a></li>
+                <li><a href="{{ url_for('main.teams') }}">Teams</a></li>
+                <li><a href="{{ url_for('main.drivers') }}">Drivers</a></li>
             </ul>
         </nav>
     </header>

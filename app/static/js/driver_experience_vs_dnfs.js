@@ -45,6 +45,14 @@ window.addEventListener('load', function() {
     }
 });
 
+// Global variable to store selected team filter
+let selectedTeamFilter = null;
+
+window.addEventListener('teamSelected', function(e) {
+    selectedTeamFilter = e.detail.team;
+    createDriverExperienceChart();
+});
+
 function displayError(containerId) {
     const vizContainer = document.querySelector(`#${containerId} .viz-content`);
     if (vizContainer) {
@@ -102,8 +110,6 @@ function createDriverExperienceChart() {
         const width = containerWidth - margin.left - margin.right;
         const height = containerHeight - margin.top - margin.bottom;
         
-        console.log(`Container dimensions: ${containerWidth}x${containerHeight}`);
-        console.log(`Chart dimensions: ${width}x${height}`);
         
         // Create SVG with responsive sizing - important to set the viewBox correctly
         const svg = d3.select(vizContainer)
@@ -181,7 +187,11 @@ function createDriverExperienceChart() {
                 console.log("Driver stats:", driverStats);
                 
                 // Continue with the chart creation
-                createChart(driverStats);
+                let filteredDriverStats = driverStats;
+                if (selectedTeamFilter) {
+                    filteredDriverStats = driverStats.filter(d => d.team === formatTeamName(selectedTeamFilter));
+                }
+                createChart(filteredDriverStats);
             })
             .catch(error => {
                 console.error("Error fetching additional data:", error);
@@ -208,9 +218,12 @@ function createDriverExperienceChart() {
                 const teams = [...new Set(points.map(d => d.team))];
                 
                 // Create scales
+                const maxTotalRaces = Math.max(...points.map(driver => driver.totalRaces));
+                console.log(`Maximum total races: ${maxTotalRaces}`);
                 const xScale = d3.scaleLinear()
-                    .domain([0, d3.max(points, d => d.totalRaces) * 1.05])
+                    .domain([0, maxTotalRaces*1.05])
                     .range([0, width]);
+
                 
                 const yScale = d3.scaleLinear()
                     .domain([0, d3.max(points, d => d.dnfRatio) * 1.05])
@@ -442,6 +455,29 @@ function createDriverExperienceChart() {
             console.error("Error loading or processing the data:", error);
             loadingText.text("Error loading data. Please try again later.");
         });
+        
+        // Add reset button
+        let resetBtn = document.getElementById('reset-team-filter-btn');
+        if (!resetBtn) {
+            resetBtn = document.createElement('button');
+            resetBtn.id = 'reset-team-filter-btn';
+            resetBtn.textContent = 'Reset Team Filter';
+            resetBtn.style.margin = '10px 0 10px 10px';
+            resetBtn.style.padding = '6px 14px';
+            resetBtn.style.background = '#e10600';
+            resetBtn.style.color = '#fff';
+            resetBtn.style.border = 'none';
+            resetBtn.style.borderRadius = '4px';
+            resetBtn.style.fontWeight = 'bold';
+            resetBtn.style.cursor = 'pointer';
+            resetBtn.style.display = 'block';
+            resetBtn.onclick = function() {
+                selectedTeamFilter = null;
+                createDriverExperienceChart();
+            };
+            vizContainer.parentNode.insertBefore(resetBtn, vizContainer);
+        }
+        resetBtn.style.display = selectedTeamFilter ? 'block' : 'none';
         
     } catch (error) {
         console.error("Error creating chart:", error);

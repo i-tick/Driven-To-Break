@@ -31,25 +31,27 @@ function initPCPPlot() {
     const isExpanded = vizContainer.closest('.expanded-view') !== null;
     
     // Set the dimensions and margins of the graph
-    const margin = {top: 30, right: 50, bottom: 50, left: 50},
+    const margin = {top: 40, right: 60, bottom: 80, left: 60},
           width = vizContainer.clientWidth - margin.left - margin.right,
           height = (isExpanded ? vizContainer.clientHeight : 500) - margin.top - margin.bottom;
     
     // Clear any existing content
     vizContainer.innerHTML = '';
     
-    // Create the SVG container
+    // Create the SVG container with dark theme styling
     const svg = d3.select(vizContainer)
         .append("svg")
         .attr("width", width + margin.left + margin.right)
         .attr("height", height + margin.top + margin.bottom)
+        .style("background-color", "#1a1a1a")
         .append("g")
         .attr("transform", `translate(${margin.left},${margin.top})`);
     
-    // Add loading indicator
+    // Add loading indicator with theme styling
     const loadingDiv = document.createElement('div');
     loadingDiv.className = 'loading';
     loadingDiv.textContent = 'Loading data...';
+    loadingDiv.style.color = '#ffffff';
     vizContainer.appendChild(loadingDiv);
     
     // Fetch data from the endpoint
@@ -67,19 +69,18 @@ function initPCPPlot() {
             }
             
             const pcpData = data.data;
-            console.log(pcpData);
             
-            // Define the dimensions to plot and their types
+            // Define the dimensions to plot and their types - reordered with categorical first
             const dimensions = [
-                { name: 'year', type: 'numeric', label: 'Year' },
                 { name: 'circuitType', type: 'categorical', label: 'Circuit Type' },
-                { name: 'grid', type: 'numeric', label: 'Grid Position' },
-                { name: 'laps', type: 'numeric', label: 'Number of Laps' },
                 { name: 'reasonRetired', type: 'categorical', label: 'Reason Retired' },
                 { name: 'constructor', type: 'categorical', label: 'Constructor' },
                 { name: 'engine', type: 'categorical', label: 'Engine' },
                 { name: 'tyre', type: 'categorical', label: 'Tyre' },
                 { name: 'country', type: 'categorical', label: 'Country' },
+                { name: 'year', type: 'numeric', label: 'Year' },
+                { name: 'grid', type: 'numeric', label: 'Grid Position' },
+                { name: 'laps', type: 'numeric', label: 'Number of Laps' }
             ];
             
             // Create scales for each dimension
@@ -90,7 +91,6 @@ function initPCPPlot() {
                         .domain(d3.extent(pcpData, d => d[dim.name]))
                         .range([height, 0]);
                 } else {
-                    // For categorical data, create a scale with unique values
                     const uniqueValues = [...new Set(pcpData.map(d => d[dim.name]))];
                     scales[dim.name] = d3.scalePoint()
                         .domain(uniqueValues)
@@ -99,12 +99,12 @@ function initPCPPlot() {
                 }
             });
             
-            // Create color scale based on year
+            // Create color scale with a more vibrant palette
             const colorScale = d3.scaleSequential()
                 .domain(d3.extent(pcpData, d => d.year))
-                .interpolator(d3.interpolateViridis);
+                .interpolator(d3.interpolateRdYlBu);
             
-            // Draw the axes
+            // Draw the axes with theme styling
             const g = svg.selectAll(".dimension")
                 .data(dimensions)
                 .enter().append("g")
@@ -115,7 +115,30 @@ function initPCPPlot() {
                     .on("drag", dragged)
                     .on("end", dragended));
             
-            // Add axis labels and lines
+            // Add background rectangles for axis labels first
+            g.append("rect")
+                .attr("x", -60)
+                .attr("y", -38)
+                .attr("width", 120)
+                .attr("height", 26)
+                .attr("rx", 6)
+                .attr("fill", "#222")
+                .attr("opacity", 0.7);
+                
+            // Add axis labels with theme styling and improved visibility
+            g.append("text")
+                .attr("text-anchor", "middle")
+                .attr("y", -22)
+                .attr("x", 0)
+                .style("font-weight", "bold")
+                .style("fill", "#fff")
+                .style("font-size", "18px")
+                .style("font-family", "sans-serif")
+                .style("pointer-events", "none")
+                .style("text-shadow", "0 0 8px #000, 0 0 2px #000, 0 0 2px #000")
+                .text(d => d.label);
+            
+            // Add axis labels and lines with theme styling
             g.append("g")
                 .attr("class", "axis")
                 .each(function(d) {
@@ -123,17 +146,20 @@ function initPCPPlot() {
                         d3.axisLeft(scales[d.name]) :
                         d3.axisLeft(scales[d.name])
                             .tickFormat(d => d.length > 10 ? d.substring(0, 10) + '...' : d);
-                    d3.select(this).call(axis);
+                    d3.select(this)
+                        .call(axis)
+                        .call(g => g.selectAll(".domain")
+                            .attr("stroke", "#888"))
+                        .call(g => g.selectAll(".tick line")
+                            .attr("stroke", "#888"))
+                        .call(g => g.selectAll(".tick text")
+                            .attr("fill", "#fff")
+                            .style("font-size", "13px")
+                            .style("font-family", "sans-serif")
+                            .style("text-shadow", "0 0 6px #000, 0 0 2px #000"));
                 });
-            
-            // Add axis labels
-            g.append("text")
-                .attr("text-anchor", "middle")
-                .attr("y", -9)
-                .style("font-weight", "bold")
-                .text(d => d.label);
-            
-            // Draw the lines
+
+            // Draw the lines with enhanced styling
             const line = d3.line()
                 .defined(d => !isNaN(d.y))
                 .x(d => d.x)
@@ -152,10 +178,10 @@ function initPCPPlot() {
                 })
                 .style("fill", "none")
                 .style("stroke", d => colorScale(d.year))
-                .style("stroke-width", 1)
-                .style("opacity", 0.5);
+                .style("stroke-width", 1.5)
+                .style("opacity", 0.7);
             
-            // Add brushing
+            // Add brushing with theme styling
             g.append("g")
                 .attr("class", "brush")
                 .each(function(d) {
@@ -173,32 +199,38 @@ function initPCPPlot() {
                             });
                         });
                     
-                    d3.select(this).call(brush);
+                    d3.select(this)
+                        .call(brush)
+                        .call(g => g.selectAll(".selection")
+                            .attr("fill", "#4a4a4a")
+                            .attr("stroke", "#666"));
                 });
             
-            // Add tooltips
+            // Add tooltips with theme styling
             path.on("mouseover", function(event, d) {
                 d3.select(this)
-                    .style("stroke-width", 2)
+                    .style("stroke-width", 3)
                     .style("opacity", 1);
                 
                 const tooltip = d3.select("body").append("div")
                     .attr("class", "tooltip")
                     .style("position", "absolute")
-                    .style("background-color", "white")
-                    .style("padding", "5px")
-                    .style("border", "1px solid #ddd")
-                    .style("border-radius", "3px");
+                    .style("background-color", "#2a2a2a")
+                    .style("color", "#ffffff")
+                    .style("padding", "10px")
+                    .style("border", "1px solid #444")
+                    .style("border-radius", "5px")
+                    .style("box-shadow", "0 2px 4px rgba(0,0,0,0.2)")
+                    .style("font-size", "12px");
                 
                 tooltip.html(`
                     <strong>Year:</strong> ${d.year}<br>
-                    <strong>Circuit Type:</strong> ${d.circuitType}<br>
                     <strong>Grid:</strong> ${d.grid}<br>
                     <strong>Laps:</strong> ${d.laps}<br>
+                    <strong>Circuit Type:</strong> ${d.circuitType}<br>
                     <strong>Status:</strong> ${d.status}<br>
                     <strong>Reason:</strong> ${d.reasonRetired}<br>
                     <strong>Constructor:</strong> ${d.constructor}<br>
-                    
                 `)
                 .style("left", (event.pageX + 10) + "px")
                 .style("top", (event.pageY - 28) + "px");
