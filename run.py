@@ -2,7 +2,7 @@ from app import create_app
 import pandas as pd
 import os
 from dotenv import load_dotenv
-from flask import jsonify
+from flask import jsonify, request
 
 # Load environment variables
 load_dotenv()
@@ -148,6 +148,119 @@ def get_pcp_data():
         return jsonify({
             'status': 'success',
             'data': pcp_data
+        })
+        
+    except Exception as e:
+        return jsonify({
+            'status': 'error',
+            'message': str(e)
+        }), 500
+
+@app.route('/api/failure-cause-breakdown', methods=['GET'])
+def get_failure_cause_breakdown():
+    """Endpoint to get data for Failure Cause Breakdown visualization"""
+    try:
+        circuit_data = app.config['DATASETS'].get('circuit_data', [])
+        
+        # Get season and circuitId filter from query parameters
+        season = request.args.get('season')
+        circuit_id = request.args.get('circuitId')
+        
+        # Filter data by season if specified
+        if season and season != 'all':
+            circuit_data = [d for d in circuit_data if str(d['year']) == season]
+        # Filter data by circuitId if specified
+        if circuit_id and circuit_id != 'all':
+            circuit_data = [d for d in circuit_data if str(d['circuitId']) == circuit_id]
+        
+        # Group data by failure reason
+        failure_counts = {}
+        for d in circuit_data:
+            reason = d.get('reasonRetired')
+            if reason and reason.strip():
+                failure_counts[reason] = failure_counts.get(reason, 0) + 1
+        
+        # Convert to list and sort by count
+        reasons_data = [{'reason': reason, 'count': count} 
+                       for reason, count in failure_counts.items()]
+        reasons_data.sort(key=lambda x: x['count'], reverse=True)
+        
+        # Calculate total and percentages
+        total = sum(d['count'] for d in reasons_data)
+        for d in reasons_data:
+            d['percentage'] = round((d['count'] / total * 100), 1) if total > 0 else 0
+        
+        return jsonify({
+            'status': 'success',
+            'data': reasons_data
+        })
+        
+    except Exception as e:
+        return jsonify({
+            'status': 'error',
+            'message': str(e)
+        }), 500
+
+@app.route('/api/team-reliability', methods=['POST'])
+def get_team_reliability():
+    """Endpoint to get team reliability data for visualization"""
+    try:
+        circuit_data = app.config['DATASETS'].get('circuit_data', [])
+        
+        # Get filters from request body
+        filters = request.json.get('filters', {})
+        season = filters.get('season')
+        team = filters.get('team')
+        selected_years = filters.get('selectedYears', ["2020", "2021", "2022", "2023", "2024"])
+        limit = filters.get('limit', 10)
+        
+        # Filter data based on parameters
+        if season and season != 'all':
+            circuit_data = [d for d in circuit_data if str(d['year']) == season]
+        if team and team != 'all':
+            circuit_data = [d for d in circuit_data if d['constructorId'] == team]
+            
+        # Count DNFs by constructor and year
+        dnfs_by_team_and_year = {}
+        for d in circuit_data:
+            team = d['constructorId']
+            year = str(d['year'])
+            if year in selected_years:
+                if team not in dnfs_by_team_and_year:
+                    dnfs_by_team_and_year[team] = {year: 0 for year in selected_years}
+                dnfs_by_team_and_year[team][year] = dnfs_by_team_and_year[team].get(year, 0) + 1
+        
+        # Convert to array format and calculate totals
+        team_data = []
+        for team, year_data in dnfs_by_team_and_year.items():
+            total = sum(year_data.values())
+            avg_dnfs = total / len(selected_years)
+            team_data.append({
+                'team': team,
+                **year_data,
+                'total': total,
+                'avgDNFsPerYear': round(avg_dnfs, 1)
+            })
+        
+        # Sort by total DNFs and limit results
+        team_data.sort(key=lambda x: x['total'], reverse=True)
+        team_data = team_data[:limit]
+        
+        # Calculate statistics
+        total_dnfs = sum(d['total'] for d in team_data)
+        avg_dnfs_per_team = round(total_dnfs / len(team_data), 1) if team_data else 0
+        
+        return jsonify({
+            'status': 'success',
+            'data': {
+                'teams': team_data,
+                'statistics': {
+                    'totalDNFs': total_dnfs,
+                    'avgDNFsPerTeam': avg_dnfs_per_team,
+                    'totalTeams': len(team_data),
+                    'years': selected_years
+                }
+            }
         })
         
     except Exception as e:

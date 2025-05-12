@@ -206,21 +206,8 @@ function initCircuitRiskIndex() {
                     .style("opacity", 0);
             })
             .on("click", function(event, d) {
-                // Zoom into the circuit location
-                const coords = projection([d.lng, d.lat]);
-                if (!coords) return;
-                
-                const scale = 4;
-                
-                mapGroup.transition()
-                    .duration(750)
-                    .attr("transform", `translate(${width/2 - coords[0] * scale}, ${height/2 - coords[1] * scale}) scale(${scale})`);
-                    
-                circuitsGroup.transition()
-                    .duration(750)
-                    .attr("transform", `translate(${width/2 - coords[0] * scale}, ${height/2 - coords[1] * scale}) scale(${scale})`)
-                    .selectAll("circle")
-                    .attr("r", d => sizeScale(d.dnfPercentage) / scale);
+                // Dispatch a custom event for cross-filtering by circuitId
+                window.dispatchEvent(new CustomEvent('circuitSelected', { detail: { circuitId: d.circuitId, circuitName: d.circuitName } }));
             });
             
         // Add a legend for circuit types with intensity gradient

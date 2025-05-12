@@ -77,51 +77,27 @@ function createTeamReliabilityChart() {
             .text("Team Reliability Ranking (DNFs by Team)");
         
         // Load and process data
-        d3.csv("/static/data/sampled.csv").then(function(data) {
-            // Define a limited set of years to include (to keep the chart readable)
-            const selectedYears = ["2020", "2021", "2022", "2023", "2024"];
-            
-            // Get unique constructors and filter the data by the selected years
-            const filteredData = data.filter(d => selectedYears.includes(d.year));
-            
-            // Count DNFs by constructor and year
-            const dnfsByTeamAndYear = d3.rollup(
-                filteredData,
-                v => v.length, // Count of DNFs
-                d => d.constructorId, // Group by constructor
-                d => d.year // Group by year
-            );
-            
-            // Convert to array format for easier processing
-            let teamData = Array.from(dnfsByTeamAndYear, ([team, yearMap]) => {
-                // Convert nested map to object with years as properties
-                const yearValues = {};
-                yearMap.forEach((count, year) => {
-                    yearValues[year] = count;
-                });
-                
-                // Set count to 0 for years that don't have data
-                selectedYears.forEach(year => {
-                    if (!yearValues[year]) yearValues[year] = 0;
-                });
-                
-                // Calculate total DNFs for sorting
-                const total = selectedYears.reduce((sum, year) => sum + (yearValues[year] || 0), 0);
-                
-                return {
-                    team: team,
-                    ...yearValues,
-                    total: total
-                };
-            });
-            
-            // Sort by total DNFs (descending)
-            teamData.sort((a, b) => b.total - a.total);
-            
-            // Limit to top 10 teams for better readability
-            if (teamData.length > 10) {
-                teamData = teamData.slice(0, 10);
+        fetch('/api/team-reliability', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                filters: {
+                    season: 'all',
+                    team: 'all',
+                    selectedYears: ["2020", "2021", "2022", "2023", "2024"],
+                    limit: 10
+                }
+            })
+        })
+        .then(response => response.json())
+        .then(response => {
+            if (response.status !== 'success') {
+                throw new Error(response.message || 'Failed to load data');
             }
+            
+            const { teams: teamData, statistics } = response.data;
             
             // Set up scales
             const xScale = d3.scaleBand()
@@ -135,12 +111,12 @@ function createTeamReliabilityChart() {
             
             // Set up a color scale for different years
             const colorScale = d3.scaleOrdinal()
-                .domain(selectedYears)
+                .domain(statistics.years)
                 .range(["#e10600", "#ff5a4d", "#ff8d85", "#ffbdb8", "#ffd2cd"]);
             
             // Create the stacked data
             const stackedData = d3.stack()
-                .keys(selectedYears)
+                .keys(statistics.years)
                 (teamData);
             
             // Create tooltip
@@ -163,7 +139,7 @@ function createTeamReliabilityChart() {
                 .data(stackedData)
                 .enter()
                 .append("g")
-                .attr("fill", (d, i) => colorScale(selectedYears[i]))
+                .attr("fill", (d, i) => colorScale(statistics.years[i]))
                 .selectAll("rect")
                 .data(d => d)
                 .enter()
@@ -175,40 +151,35 @@ function createTeamReliabilityChart() {
                 .attr("stroke", "#2a2a2a")
                 .attr("stroke-width", 1)
                 .on("mouseover", function(event, d) {
-                    // Get the year from the parent g element's data
                     const yearIndex = this.parentNode.__data__.index;
-                    const year = selectedYears[yearIndex];
-                    const count = d[1] - d[0]; // The value for this segment
+                    const year = statistics.years[yearIndex];
+                    const count = d[1] - d[0];
                     
-                    // Position tooltip
                     const [mouseX, mouseY] = d3.pointer(event, vizContainer);
                     
                     tooltip.transition()
                         .duration(200)
                         .style("opacity", 0.9);
                     
-                    // Format tooltip content
                     tooltip.html(`
                         <strong>Team:</strong> ${formatTeamName(d.data.team)}<br>
                         <strong>Year:</strong> ${year}<br>
                         <strong>DNFs:</strong> ${count}<br>
-                        <strong>Total DNFs:</strong> ${d.data.total}
+                        <strong>Total DNFs:</strong> ${d.data.total}<br>
+                        <strong>Avg DNFs/Year:</strong> ${d.data.avgDNFsPerYear}
                     `)
                     .style("left", (mouseX + 10) + "px")
                     .style("top", (mouseY - 15) + "px");
                     
-                    // Highlight current segment
                     d3.select(this)
                         .style("stroke", "#ffffff")
                         .style("stroke-width", "2px");
                 })
                 .on("mouseout", function() {
-                    // Hide tooltip
                     tooltip.transition()
                         .duration(500)
                         .style("opacity", 0);
                     
-                    // Remove highlight
                     d3.select(this)
                         .style("stroke", "#2a2a2a")
                         .style("stroke-width", "1px");
@@ -234,27 +205,25 @@ function createTeamReliabilityChart() {
                 .style("fill", "#cccccc")
                 .style("font-size", "12px");
             
-            // Add X axis label
+            // Add statistics text
             svg.append("text")
-                .attr("text-anchor", "middle")
-                .attr("x", width / 2)
-                .attr("y", height + margin.bottom - 10)
-                .style("fill", "#cccccc")
-                .text("Teams");
-            
-            // Add Y axis label
-            svg.append("text")
-                .attr("text-anchor", "middle")
-                .attr("transform", `translate(${-margin.left + 15}, ${height/2}) rotate(-90)`)
-                .style("fill", "#cccccc")
-                .text("Number of DNFs");
+                .attr("class", "statistics-text")
+                .attr("x", width + 20)
+                .attr("y", height - 60)
+                .attr("fill", "#ffffff")
+                .style("font-size", "12px")
+                .html(`
+                    <tspan x="${width + 20}" dy="0">Total DNFs: ${statistics.totalDNFs}</tspan>
+                    <tspan x="${width + 20}" dy="20">Avg DNFs/Team: ${statistics.avgDNFsPerTeam}</tspan>
+                    <tspan x="${width + 20}" dy="20">Teams Shown: ${statistics.totalTeams}</tspan>
+                `);
             
             // Add legend
             const legend = svg.append("g")
                 .attr("font-size", "12px")
                 .attr("text-anchor", "start")
                 .selectAll("g")
-                .data(selectedYears)
+                .data(statistics.years)
                 .enter()
                 .append("g")
                 .attr("transform", (d, i) => `translate(${width + 20}, ${i * 20})`);
@@ -278,19 +247,169 @@ function createTeamReliabilityChart() {
                 
                 console.log("Filtering by team:", selectedTeam, "and season:", selectedSeason);
                 
-                // This is a placeholder for actual filtering logic
-                if (selectedTeam !== "all" || selectedSeason !== "all") {
+                // Prepare filter object for POST request
+                const filters = {
+                    season: selectedSeason,
+                    team: selectedTeam,
+                    selectedYears: ["2020", "2021", "2022", "2023", "2024"],
+                    limit: 10
+                };
+                
+                // Fetch filtered data using POST
+                fetch('/api/team-reliability', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ filters })
+                })
+                .then(response => response.json())
+                .then(response => {
+                    if (response.status !== 'success') {
+                        throw new Error(response.message || 'Failed to load filtered data');
+                    }
+                    
+                    const { teams: filteredData, statistics } = response.data;
+                    
+                    if (filteredData.length > 0) {
+                        // Clear existing visualization
+                        svg.selectAll("*").remove();
+                        
+                        // Update scales with new data
+                        xScale.domain(filteredData.map(d => d.team));
+                        yScale.domain([0, d3.max(filteredData, d => d.total) * 1.1]);
+                        
+                        // Create new stacked data
+                        const newStackedData = d3.stack()
+                            .keys(statistics.years)
+                            (filteredData);
+                        
+                        // Add bars for each year
+                        svg.append("g")
+                            .selectAll("g")
+                            .data(newStackedData)
+                            .enter()
+                            .append("g")
+                            .attr("fill", (d, i) => colorScale(statistics.years[i]))
+                            .selectAll("rect")
+                            .data(d => d)
+                            .enter()
+                            .append("rect")
+                            .attr("x", d => xScale(d.data.team))
+                            .attr("y", d => yScale(d[1]))
+                            .attr("height", d => yScale(d[0]) - yScale(d[1]))
+                            .attr("width", xScale.bandwidth())
+                            .attr("stroke", "#2a2a2a")
+                            .attr("stroke-width", 1)
+                            .on("mouseover", function(event, d) {
+                                const yearIndex = this.parentNode.__data__.index;
+                                const year = statistics.years[yearIndex];
+                                const count = d[1] - d[0];
+                                
+                                const [mouseX, mouseY] = d3.pointer(event, vizContainer);
+                                
+                                tooltip.transition()
+                                    .duration(200)
+                                    .style("opacity", 0.9);
+                                
+                                tooltip.html(`
+                                    <strong>Team:</strong> ${formatTeamName(d.data.team)}<br>
+                                    <strong>Year:</strong> ${year}<br>
+                                    <strong>DNFs:</strong> ${count}<br>
+                                    <strong>Total DNFs:</strong> ${d.data.total}<br>
+                                    <strong>Avg DNFs/Year:</strong> ${d.data.avgDNFsPerYear}
+                                `)
+                                .style("left", (mouseX + 10) + "px")
+                                .style("top", (mouseY - 15) + "px");
+                                
+                                d3.select(this)
+                                    .style("stroke", "#ffffff")
+                                    .style("stroke-width", "2px");
+                            })
+                            .on("mouseout", function() {
+                                tooltip.transition()
+                                    .duration(500)
+                                    .style("opacity", 0);
+                                
+                                d3.select(this)
+                                    .style("stroke", "#2a2a2a")
+                                    .style("stroke-width", "1px");
+                            });
+                        
+                        // Add X axis
+                        svg.append("g")
+                            .attr("transform", `translate(0, ${height})`)
+                            .call(d3.axisBottom(xScale)
+                                .tickFormat(d => formatTeamName(d)))
+                            .selectAll("text")
+                            .style("fill", "#cccccc")
+                            .style("font-size", "12px")
+                            .attr("transform", "rotate(-45)")
+                            .style("text-anchor", "end")
+                            .attr("dx", "-.8em")
+                            .attr("dy", ".15em");
+                        
+                        // Add Y axis
+                        svg.append("g")
+                            .call(d3.axisLeft(yScale).ticks(5))
+                            .selectAll("text")
+                            .style("fill", "#cccccc")
+                            .style("font-size", "12px");
+                        
+                        // Add statistics text
+                        svg.append("text")
+                            .attr("class", "statistics-text")
+                            .attr("x", width + 20)
+                            .attr("y", height - 60)
+                            .attr("fill", "#ffffff")
+                            .style("font-size", "12px")
+                            .html(`
+                                <tspan x="${width + 20}" dy="0">Total DNFs: ${statistics.totalDNFs}</tspan>
+                                <tspan x="${width + 20}" dy="20">Avg DNFs/Team: ${statistics.avgDNFsPerTeam}</tspan>
+                                <tspan x="${width + 20}" dy="20">Teams Shown: ${statistics.totalTeams}</tspan>
+                            `);
+                        
+                        // Add legend
+                        const legend = svg.append("g")
+                            .attr("font-size", "12px")
+                            .attr("text-anchor", "start")
+                            .selectAll("g")
+                            .data(statistics.years)
+                            .enter()
+                            .append("g")
+                            .attr("transform", (d, i) => `translate(${width + 20}, ${i * 20})`);
+                        
+                        legend.append("rect")
+                            .attr("x", 0)
+                            .attr("width", 15)
+                            .attr("height", 15)
+                            .attr("fill", d => colorScale(d));
+                        
+                        legend.append("text")
+                            .attr("x", 20)
+                            .attr("y", 12.5)
+                            .attr("fill", "#ffffff")
+                            .text(d => d);
+                        
+                    } else {
+                        // No data for this filter combination
+                        svg.append("text")
+                            .attr("x", width / 2)
+                            .attr("y", height / 2)
+                            .attr("text-anchor", "middle")
+                            .style("fill", "#e10600")
+                            .text("No data available for selected filters");
+                    }
+                })
+                .catch(error => {
+                    console.error("Error loading filtered data:", error);
                     svg.append("text")
-                        .attr("class", "filter-message")
                         .attr("x", width / 2)
                         .attr("y", height / 2)
                         .attr("text-anchor", "middle")
                         .style("fill", "#e10600")
-                        .style("font-size", "14px")
-                        .text(`Filtered by: ${selectedTeam !== "all" ? `Team: ${selectedTeam}` : ""} ${selectedSeason !== "all" ? `Season: ${selectedSeason}` : ""}`);
-                } else {
-                    svg.selectAll(".filter-message").remove();
-                }
+                        .text("Error loading filtered data");
+                });
             }
             
             // Add filter listeners
