@@ -26,6 +26,51 @@ function debounce(func, wait) {
     };
 }
 
+let selectedCountryFilter = null;
+
+window.addEventListener('countrySelected', function(e) {
+    // Set the filter to the selected country from the geo map
+    selectedCountryFilter = e.detail.country;
+    updatePCPHighlightByCountry();
+});
+
+function updatePCPHighlightByCountry() {
+    d3.selectAll('.pcp-line').style('display', d => {
+        if (!selectedCountryFilter) return null;
+        return d.country === selectedCountryFilter ? null : 'none';
+    });
+    // Show/hide reset button
+    const btn = document.getElementById('reset-country-filter-btn');
+    if (btn) btn.style.display = selectedCountryFilter ? 'block' : 'none';
+}
+
+function addCountryResetButton() {
+    let btn = document.getElementById('reset-country-filter-btn');
+    if (!btn) {
+        btn = document.createElement('button');
+        btn.id = 'reset-country-filter-btn';
+        btn.textContent = 'Reset Country Filter';
+        btn.style.margin = '10px 0 10px 10px';
+        btn.style.padding = '6px 14px';
+        btn.style.background = '#e10600';
+        btn.style.color = '#fff';
+        btn.style.border = 'none';
+        btn.style.borderRadius = '4px';
+        btn.style.fontWeight = 'bold';
+        btn.style.cursor = 'pointer';
+        btn.style.display = 'none';
+        btn.onclick = function() {
+            selectedCountryFilter = null;
+            updatePCPHighlightByCountry();
+        };
+        // Insert above the PCP plot
+        const vizContainer = document.querySelector('#pcp-plot .viz-content');
+        if (vizContainer) {
+            vizContainer.parentNode.insertBefore(btn, vizContainer);
+        }
+    }
+}
+
 function initPCPPlot() {
     const vizContainer = document.querySelector('#pcp-plot .viz-content');
     const isExpanded = vizContainer.closest('.expanded-view') !== null;
@@ -111,6 +156,9 @@ function initPCPPlot() {
                 .attr("class", "dimension")
                 .attr("transform", (d, i) => `translate(${i * (width / (dimensions.length - 1))}, 0)`)
                 .call(d3.drag()
+                    .subject(function(event, d) {
+                        return {x: d3.select(this).attr("transform").match(/translate\(([^,]+)/)[1]};
+                    })
                     .on("start", dragstarted)
                     .on("drag", dragged)
                     .on("end", dragended));
@@ -165,10 +213,12 @@ function initPCPPlot() {
                 .x(d => d.x)
                 .y(d => d.y);
             
+            // When drawing lines, add class 'pcp-line' and bind data
             const path = svg.append("g")
                 .selectAll("path")
                 .data(pcpData)
                 .enter().append("path")
+                .attr("class", "pcp-line")
                 .attr("d", d => {
                     const points = dimensions.map(dim => ({
                         x: dimensions.indexOf(dim) * (width / (dimensions.length - 1)),
@@ -178,8 +228,8 @@ function initPCPPlot() {
                 })
                 .style("fill", "none")
                 .style("stroke", d => colorScale(d.year))
-                .style("stroke-width", 1.5)
-                .style("opacity", 0.7);
+                .style("stroke-width", 1)
+                .style("opacity", 0.5);
             
             // Add brushing with theme styling
             g.append("g")
@@ -243,45 +293,87 @@ function initPCPPlot() {
             });
             
             // Drag functions
-            function dragstarted(event) {
-                d3.select(this).raise().attr("stroke", "black");
+            function dragstarted(event, d) {
+                d3.select(this).raise().classed("active", true);
             }
             
             function dragged(event, d) {
-                const x = event.x;
-                const i = dimensions.indexOf(d);
+                const thisElem = d3.select(this);
+                const xPos = event.x;
                 
-                // Calculate new positions for all axes
-                const newPositions = dimensions.map((dim, j) => {
-                    if (j === i) return x - margin.left;
-                    if (j < i) return j * (width / (dimensions.length - 1));
-                    return j * (width / (dimensions.length - 1));
+                // Update the position of the current axis
+                thisElem.attr("transform", `translate(${xPos}, 0)`);
+                
+                // Determine new order of dimensions based on x positions
+                const dimensions_copy = [...dimensions];
+                const positions = [];
+                
+                // Get current positions of all axes
+                svg.selectAll(".dimension").each(function(d, i) {
+                    const transform = d3.select(this).attr("transform");
+                    const x = parseFloat(transform.match(/translate\(([^,]+)/)[1]);
+                    positions.push({dim: d, x: x, index: i});
                 });
                 
-                // Sort new positions to maintain order
-                newPositions.sort((a, b) => a - b);
+                // Sort by x position
+                positions.sort((a, b) => a.x - b.x);
                 
-                // Update positions of all axes
-                g.attr("transform", (d, j) => `translate(${newPositions[j]}, 0)`);
+                // Remap dimensions array based on new positions
+                const newDimensions = positions.map(p => p.dim);
                 
-                // Update the positions of all paths
+                // Update the path to reflect the new axis positions
                 path.attr("d", d => {
-                    const points = dimensions.map((dim, j) => {
-                        const xPos = j === i ? x - margin.left : j * (width / (dimensions.length - 1));
-                        return {
-                            x: xPos,
-                            y: scales[dim.name](d[dim.name])
-                        };
+                    const points = [];
+                    positions.forEach((p, i) => {
+                        points.push({
+                            x: p.x,
+                            y: scales[p.dim.name](d[p.dim.name])
+                        });
                     });
                     return line(points);
                 });
             }
             
-            function dragended(event) {
-                d3.select(this).attr("stroke", null);
+            function dragended(event, d) {
+                d3.select(this).classed("active", false);
+                
+                // After dragging completes, reorder axes to have even spacing
+                const positions = [];
+                svg.selectAll(".dimension").each(function(d) {
+                    const transform = d3.select(this).attr("transform");
+                    const x = parseFloat(transform.match(/translate\(([^,]+)/)[1]);
+                    positions.push({dim: d, x: x, elem: this});
+                });
+                
+                // Sort by x position
+                positions.sort((a, b) => a.x - b.x);
+                
+                // Update positions with even spacing
+                positions.forEach((p, i) => {
+                    const newX = i * (width / (dimensions.length - 1));
+                    d3.select(p.elem).attr("transform", `translate(${newX}, 0)`);
+                });
+                
+                // Update the paths with the new even spacing
+                path.attr("d", d => {
+                    const points = [];
+                    positions.forEach((p, i) => {
+                        const newX = i * (width / (dimensions.length - 1));
+                        points.push({
+                            x: newX,
+                            y: scales[p.dim.name](d[p.dim.name])
+                        });
+                    });
+                    return line(points);
+                });
             }
+
+            // After drawing lines, apply country filter if active
+            updatePCPHighlightByCountry();
         }).catch(function(error) {
             console.error("Error loading data:", error);
             vizContainer.innerHTML = `<div class="error-message">Failed to load data: ${error.message}</div>`;
         });
+
+    addCountryResetButton();
 }

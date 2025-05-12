@@ -207,6 +207,8 @@ function initCircuitRiskIndex() {
             .on("click", function(event, d) {
                 // Dispatch a custom event for cross-filtering by circuitId
                 window.dispatchEvent(new CustomEvent('circuitSelected', { detail: { circuitId: d.circuitId, circuitName: d.circuitName } }));
+                // Dispatch a countrySelected event for PCP plot filtering
+                window.dispatchEvent(new CustomEvent('countrySelected', { detail: { country: d.country } }));
             });
             
         // Add a legend for circuit types with intensity gradient

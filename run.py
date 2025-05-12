@@ -215,8 +215,6 @@ def get_team_reliability():
         
         # Filter data based on parameters
         if season and season != 'all':
-            
-
             circuit_data = [d for d in circuit_data if str(d['year']) == season]
         if team and team != 'all':
             circuit_data = [d for d in circuit_data if d['constructorId'] == team]

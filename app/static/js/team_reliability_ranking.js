@@ -1,4 +1,4 @@
-// Team Reliability Ranking Visualization (Stacked Bar Chart)
+// Team Reliability Ranking Visualization (Stream Chart)
 
 document.addEventListener('DOMContentLoaded', function() {
     // Check if D3 is loaded
@@ -74,7 +74,7 @@ function createTeamReliabilityChart() {
             .style("font-size", isExpanded ? "20px" : "16px")
             .style("font-weight", "bold")
             .style("fill", "#ffffff")
-            .text("Team Reliability Ranking (DNFs by Team)");
+            .text("Team Reliability Trends (DNFs Over Time)");
         
         // Load and process data
         fetch('/api/team-reliability', {
@@ -86,7 +86,7 @@ function createTeamReliabilityChart() {
                 filters: {
                     season: 'all',
                     team: 'all',
-                    selectedYears: ["2020", "2021", "2022", "2023", "2024"],
+                    selectedYears: ["2015", "2016", "2017", "2018", "2019", "2020", "2021", "2022", "2023", "2024"],
                     limit: 10
                 }
             })
@@ -99,25 +99,58 @@ function createTeamReliabilityChart() {
             
             const { teams: teamData, statistics } = response.data;
             
+            // Restructure data for stream chart
+            const years = statistics.years;
+            const teams = teamData.map(d => d.team);
+            
+            // Create stream data structure
+            const streamData = [];
+            years.forEach(year => {
+                const yearData = { year };
+                teamData.forEach(team => {
+                    yearData[team.team] = team[year] || 0;
+                });
+                streamData.push(yearData);
+            });
+            
             // Set up scales
-            const xScale = d3.scaleBand()
-                .domain(teamData.map(d => d.team))
+            const xScale = d3.scalePoint()
+                .domain(years)
                 .range([0, width])
-                .padding(0.2);
+                .padding(0.5);
             
             const yScale = d3.scaleLinear()
-                .domain([0, d3.max(teamData, d => d.total) * 1.1]) // Add 10% padding
+                .domain([0, d3.max(streamData, d => {
+                    return d3.sum(teams, team => d[team] || 0);
+                }) * 1.1]) // Add 10% padding
                 .range([height, 0]);
             
-            // Set up a color scale for different years
-            const colorScale = d3.scaleOrdinal()
-                .domain(statistics.years)
-                .range(["#e10600", "#ff5a4d", "#ff8d85", "#ffbdb8", "#ffd2cd"]);
+            // Set up a color scale for different teams with shades of red and orange
+            // to match the dashboard theme
+            const redOrangeColors = [
+                "#e10600", "#ff1a1a", "#ff4d4d", "#ff8080", "#ffb3b3",
+                "#ff6600", "#ff8533", "#ffa366", "#ffc299", "#ffe0cc",
+                "#cc0000", "#990000", "#660000", "#ff3300", "#cc2900"
+            ];
             
-            // Create the stacked data
-            const stackedData = d3.stack()
-                .keys(statistics.years)
-                (teamData);
+            const colorScale = d3.scaleOrdinal()
+                .domain(teams)
+                .range(redOrangeColors);
+            
+            // Create the stack generator
+            const stack = d3.stack()
+                .keys(teams)
+                .order(d3.stackOrderNone)
+                .offset(d3.stackOffsetNone);
+            
+            const stackedData = stack(streamData);
+            
+            // Create the area generator
+            const area = d3.area()
+                .x(d => xScale(d.data.year))
+                .y0(d => yScale(d[0]))
+                .y1(d => yScale(d[1]))
+                .curve(d3.curveBasis);
             
             // Create tooltip
             const tooltip = d3.select(vizContainer)
@@ -133,81 +166,92 @@ function createTeamReliabilityChart() {
                 .style("pointer-events", "none")
                 .style("width", "auto");
             
-            // Add bars for each year
-            svg.append("g")
-                .selectAll("g")
+            // Add stream areas
+            svg.selectAll(".stream-layer")
                 .data(stackedData)
                 .enter()
-                .append("g")
-                .attr("fill", (d, i) => colorScale(statistics.years[i]))
-                .selectAll("rect")
-                .data(d => d)
-                .enter()
-                .append("rect")
-                .attr("x", d => xScale(d.data.team))
-                .attr("y", d => yScale(d[1]))
-                .attr("height", d => yScale(d[0]) - yScale(d[1]))
-                .attr("width", xScale.bandwidth())
+                .append("path")
+                .attr("class", "stream-layer")
+                .attr("d", area)
+                .attr("fill", d => colorScale(d.key))
                 .attr("stroke", "#2a2a2a")
-                .attr("stroke-width", 1)
+                .attr("stroke-width", 0.5)
+                .attr("opacity", 0.8)
                 .on("mouseover", function(event, d) {
-                    const yearIndex = this.parentNode.__data__.index;
-                    const year = statistics.years[yearIndex];
-                    const count = d[1] - d[0];
+                    const team = d.key;
                     
-                    const [mouseX, mouseY] = d3.pointer(event, vizContainer);
+                    d3.select(this)
+                        .attr("stroke", "#ffffff")
+                        .attr("stroke-width", "2px")
+                        .attr("opacity", 1);
                     
                     tooltip.transition()
                         .duration(200)
                         .style("opacity", 0.9);
                     
+                    const [mouseX, mouseY] = d3.pointer(event, vizContainer);
+                    
+                    // Find the closest year to the mouse position
+                    const xPos = d3.pointer(event)[0];
+                    const yearIndex = Math.round((xPos / width) * (years.length - 1));
+                    const year = years[yearIndex];
+                    const dnfs = d[yearIndex].data[team] || 0;
+                    
                     tooltip.html(`
-                        <strong>Team:</strong> ${formatTeamName(d.data.team)}<br>
+                        <strong>Team:</strong> ${formatTeamName(team)}<br>
                         <strong>Year:</strong> ${year}<br>
-                        <strong>DNFs:</strong> ${count}<br>
-                        <strong>Total DNFs:</strong> ${d.data.total}<br>
-                        <strong>Avg DNFs/Year:</strong> ${d.data.avgDNFsPerYear}
+                        <strong>DNFs:</strong> ${dnfs}<br>
+                        <strong>Total DNFs:</strong> ${teamData.find(t => t.team === team).total}
                     `)
                     .style("left", (mouseX + 10) + "px")
                     .style("top", (mouseY - 15) + "px");
-                    
-                    d3.select(this)
-                        .style("stroke", "#ffffff")
-                        .style("stroke-width", "2px");
                 })
                 .on("mouseout", function() {
+                    d3.select(this)
+                        .attr("stroke", "#2a2a2a")
+                        .attr("stroke-width", "0.5px")
+                        .attr("opacity", 0.8);
+                    
                     tooltip.transition()
                         .duration(500)
                         .style("opacity", 0);
-                    
-                    d3.select(this)
-                        .style("stroke", "#2a2a2a")
-                        .style("stroke-width", "1px");
                 })
                 .on("click", function(event, d) {
                     // Emit a custom event for cross-filtering by team
-                    window.dispatchEvent(new CustomEvent('teamSelected', { detail: { team: d.data.team } }));
+                    window.dispatchEvent(new CustomEvent('teamSelected', { detail: { team: d.key } }));
                 });
             
             // Add X axis
             svg.append("g")
                 .attr("transform", `translate(0, ${height})`)
-                .call(d3.axisBottom(xScale)
-                    .tickFormat(d => formatTeamName(d)))
-                .selectAll("text")
-                .style("fill", "#cccccc")
-                .style("font-size", "12px")
-                .attr("transform", "rotate(-45)")
-                .style("text-anchor", "end")
-                .attr("dx", "-.8em")
-                .attr("dy", ".15em");
-            
-            // Add Y axis
-            svg.append("g")
-                .call(d3.axisLeft(yScale).ticks(5))
+                .call(d3.axisBottom(xScale))
                 .selectAll("text")
                 .style("fill", "#cccccc")
                 .style("font-size", "12px");
+            
+            // Add X axis label
+            svg.append("text")
+                .attr("x", width / 2)
+                .attr("y", height + 40)
+                .attr("text-anchor", "middle")
+                .style("fill", "#ffffff")
+                .text("Year");
+            
+            // Add Y axis
+            svg.append("g")
+                .call(d3.axisLeft(yScale))
+                .selectAll("text")
+                .style("fill", "#cccccc")
+                .style("font-size", "12px");
+            
+            // Add Y axis label
+            svg.append("text")
+                .attr("transform", "rotate(-90)")
+                .attr("x", -height / 2)
+                .attr("y", -40)
+                .attr("text-anchor", "middle")
+                .style("fill", "#ffffff")
+                .text("DNF Difference");
             
             // Add statistics text
             svg.append("text")
@@ -227,7 +271,7 @@ function createTeamReliabilityChart() {
                 .attr("font-size", "12px")
                 .attr("text-anchor", "start")
                 .selectAll("g")
-                .data(statistics.years)
+                .data(teams)
                 .enter()
                 .append("g")
                 .attr("transform", (d, i) => `translate(${width + 20}, ${i * 20})`);
@@ -242,7 +286,7 @@ function createTeamReliabilityChart() {
                 .attr("x", 20)
                 .attr("y", 12.5)
                 .attr("fill", "#ffffff")
-                .text(d => d);
+                .text(d => formatTeamName(d));
             
             // Add filters
             function updateChart() {
@@ -255,7 +299,7 @@ function createTeamReliabilityChart() {
                 const filters = {
                     season: selectedSeason,
                     team: selectedTeam,
-                    selectedYears: ["2020", "2021", "2022", "2023", "2024"],
+                    selectedYears: ["2015", "2016", "2017", "2018", "2019", "2020", "2021", "2022", "2023", "2024", "2025"],
                     limit: 10
                 };
                 
@@ -279,90 +323,130 @@ function createTeamReliabilityChart() {
                         // Clear existing visualization
                         svg.selectAll("*").remove();
                         
-                        // Update scales with new data
-                        xScale.domain(filteredData.map(d => d.team));
-                        yScale.domain([0, d3.max(filteredData, d => d.total) * 1.1]);
+                        // Restructure data for stream chart
+                        const years = statistics.years;
+                        const teams = filteredData.map(d => d.team);
                         
-                        // Create new stacked data
-                        const newStackedData = d3.stack()
-                            .keys(statistics.years)
-                            (filteredData);
+                        // Create stream data structure
+                        const streamData = [];
+                        years.forEach(year => {
+                            const yearData = { year };
+                            filteredData.forEach(team => {
+                                yearData[team.team] = team[year] || 0;
+                            });
+                            streamData.push(yearData);
+                        });
                         
-                        // Add bars for each year
-                        svg.append("g")
-                            .selectAll("g")
-                            .data(newStackedData)
+                        // Update scales
+                        xScale.domain(years);
+                        yScale.domain([0, d3.max(streamData, d => {
+                            return d3.sum(teams, team => d[team] || 0);
+                        }) * 1.1]);
+                        
+                        // Update color scale
+                        colorScale.domain(teams);
+                        
+                        // Update stack generator
+                        const stack = d3.stack()
+                            .keys(teams)
+                            .order(d3.stackOrderNone)
+                            .offset(d3.stackOffsetWiggle);
+                        
+                        const stackedData = stack(streamData);
+                        
+                        // Update area generator
+                        const area = d3.area()
+                            .x(d => xScale(d.data.year))
+                            .y0(d => yScale(d[0]))
+                            .y1(d => yScale(d[1]))
+                            .curve(d3.curveBasis);
+                        
+                        // Add stream areas
+                        svg.selectAll(".stream-layer")
+                            .data(stackedData)
                             .enter()
-                            .append("g")
-                            .attr("fill", (d, i) => colorScale(statistics.years[i]))
-                            .selectAll("rect")
-                            .data(d => d)
-                            .enter()
-                            .append("rect")
-                            .attr("x", d => xScale(d.data.team))
-                            .attr("y", d => yScale(d[1]))
-                            .attr("height", d => yScale(d[0]) - yScale(d[1]))
-                            .attr("width", xScale.bandwidth())
+                            .append("path")
+                            .attr("class", "stream-layer")
+                            .attr("d", area)
+                            .attr("fill", d => colorScale(d.key))
                             .attr("stroke", "#2a2a2a")
-                            .attr("stroke-width", 1)
+                            .attr("stroke-width", 0.5)
+                            .attr("opacity", 0.8)
                             .on("mouseover", function(event, d) {
-                                const yearIndex = this.parentNode.__data__.index;
-                                const year = statistics.years[yearIndex];
-                                const count = d[1] - d[0];
+                                const team = d.key;
                                 
-                                const [mouseX, mouseY] = d3.pointer(event, vizContainer);
+                                d3.select(this)
+                                    .attr("stroke", "#ffffff")
+                                    .attr("stroke-width", "2px")
+                                    .attr("opacity", 1);
                                 
                                 tooltip.transition()
                                     .duration(200)
                                     .style("opacity", 0.9);
                                 
+                                const [mouseX, mouseY] = d3.pointer(event, vizContainer);
+                                
+                                // Find the closest year to the mouse position
+                                const xPos = d3.pointer(event)[0];
+                                const yearIndex = Math.round((xPos / width) * (years.length - 1));
+                                const year = years[yearIndex];
+                                const dnfs = d[yearIndex].data[team] || 0;
+                                
                                 tooltip.html(`
-                                    <strong>Team:</strong> ${formatTeamName(d.data.team)}<br>
+                                    <strong>Team:</strong> ${formatTeamName(team)}<br>
                                     <strong>Year:</strong> ${year}<br>
-                                    <strong>DNFs:</strong> ${count}<br>
-                                    <strong>Total DNFs:</strong> ${d.data.total}<br>
-                                    <strong>Avg DNFs/Year:</strong> ${d.data.avgDNFsPerYear}
+                                    <strong>DNFs:</strong> ${dnfs}<br>
+                                    <strong>Total DNFs:</strong> ${filteredData.find(t => t.team === team).total}
                                 `)
                                 .style("left", (mouseX + 10) + "px")
                                 .style("top", (mouseY - 15) + "px");
-                                
-                                d3.select(this)
-                                    .style("stroke", "#ffffff")
-                                    .style("stroke-width", "2px");
                             })
                             .on("mouseout", function() {
+                                d3.select(this)
+                                    .attr("stroke", "#2a2a2a")
+                                    .attr("stroke-width", "0.5px")
+                                    .attr("opacity", 0.8);
+                                
                                 tooltip.transition()
                                     .duration(500)
                                     .style("opacity", 0);
-                                
-                                d3.select(this)
-                                    .style("stroke", "#2a2a2a")
-                                    .style("stroke-width", "1px");
                             })
                             .on("click", function(event, d) {
                                 // Emit a custom event for cross-filtering by team
-                                window.dispatchEvent(new CustomEvent('teamSelected', { detail: { team: d.data.team } }));
+                                window.dispatchEvent(new CustomEvent('teamSelected', { detail: { team: d.key } }));
                             });
                         
                         // Add X axis
                         svg.append("g")
                             .attr("transform", `translate(0, ${height})`)
-                            .call(d3.axisBottom(xScale)
-                                .tickFormat(d => formatTeamName(d)))
-                            .selectAll("text")
-                            .style("fill", "#cccccc")
-                            .style("font-size", "12px")
-                            .attr("transform", "rotate(-45)")
-                            .style("text-anchor", "end")
-                            .attr("dx", "-.8em")
-                            .attr("dy", ".15em");
-                        
-                        // Add Y axis
-                        svg.append("g")
-                            .call(d3.axisLeft(yScale).ticks(5))
+                            .call(d3.axisBottom(xScale))
                             .selectAll("text")
                             .style("fill", "#cccccc")
                             .style("font-size", "12px");
+                        
+                        // Add X axis label
+                        svg.append("text")
+                            .attr("x", width / 2)
+                            .attr("y", height + 40)
+                            .attr("text-anchor", "middle")
+                            .style("fill", "#ffffff")
+                            .text("Year");
+                        
+                        // Add Y axis
+                        svg.append("g")
+                            .call(d3.axisLeft(yScale))
+                            .selectAll("text")
+                            .style("fill", "#cccccc")
+                            .style("font-size", "12px");
+                        
+                        // Add Y axis label
+                        svg.append("text")
+                            .attr("transform", "rotate(-90)")
+                            .attr("x", -height / 2)
+                            .attr("y", -40)
+                            .attr("text-anchor", "middle")
+                            .style("fill", "#ffffff")
+                            .text("DNF Difference");
                         
                         // Add statistics text
                         svg.append("text")
@@ -382,7 +466,7 @@ function createTeamReliabilityChart() {
                             .attr("font-size", "12px")
                             .attr("text-anchor", "start")
                             .selectAll("g")
-                            .data(statistics.years)
+                            .data(teams)
                             .enter()
                             .append("g")
                             .attr("transform", (d, i) => `translate(${width + 20}, ${i * 20})`);
@@ -397,7 +481,7 @@ function createTeamReliabilityChart() {
                             .attr("x", 20)
                             .attr("y", 12.5)
                             .attr("fill", "#ffffff")
-                            .text(d => d);
+                            .text(d => formatTeamName(d));
                         
                     } else {
                         // No data for this filter combination
