@@ -22,7 +22,8 @@ def load_datasets():
         races_race_df = races_race_df.dropna(subset=['reasonRetired'])
         
         # Select the bottom 100 rows
-        bottom_1000 = races_race_df[(races_race_df['year'] >= 2009) & (races_race_df['year'] <= 2025)]
+        bottom_1000 = races_race_df[(races_race_df['year'] >= 2015) & (races_race_df['year'] <= 2025)]
+
 
         
         # Delete columns with any empty values
@@ -31,15 +32,19 @@ def load_datasets():
         races_df = pd.read_csv('app/static/data/races.csv')
         # Merge the two dataframes based on the 'circuitId' column
         bottom_1000 = pd.merge(bottom_1000, races_df[['raceId', 'circuitId', 'grandPrixId']], on='raceId', how='left')
-        filtered_races = races_df[(races_df['year'] >= 2009) & (races_df['year'] <= 2025)]
+        filtered_races = races_df[(races_df['year'] >= 2015) & (races_df['year'] <= 2025)]
 
         grand_prix_counts = filtered_races['grandPrixId'].value_counts().reset_index()
         grand_prix_counts.columns = ['grandPrixId', 'raceCount']
 
         circuits_df = pd.read_csv('app/static/data/circuits.csv')
         # Merge the two dataframes based on the 'circuitId' column
-        bottom_1000 = pd.merge(bottom_1000, circuits_df[['circuitId', 'latitude', 'longitude', 'type']], on='circuitId', how='left')
+        bottom_1000 = pd.merge(bottom_1000, circuits_df[['circuitId', 'latitude', 'longitude', 'type','countryId']], on='circuitId', how='left')
         
+        drivers_df = pd.read_csv('app/static/data/f1db-drivers.csv')
+        # Merge the two dataframes based on the 'circuitId' column
+        bottom_1000 = pd.merge(bottom_1000, drivers_df[['driverId', 'totalRaceStarts']], on='driverId', how='left')
+
         # Save the processed data
         output_path = 'app/static/data/sampled.csv'
         bottom_1000.to_csv(output_path, index=False)
@@ -73,7 +78,8 @@ def get_circuit_data():
                     'circuitName': d.get('circuitName', circuit_id),
                     'lat': float(d['latitude']),
                     'lng': float(d['longitude']),
-                    'country': d['grandPrixId'],
+                    'country': d['countryId'],
+                    'grandPrixId': d['grandPrixId'],
                     'circuitType': d.get('type', 'Unknown'),
                     'totalRaces': 0,
                     'dnfCount': 0,
@@ -82,7 +88,7 @@ def get_circuit_data():
             
             circuits_by_location[circuit_id]['totalRaces'] += 1
             
-            if d.get('positionText') == 'DNF' and d.get('reasonRetired'):
+            if d.get('reasonRetired'):
                 circuits_by_location[circuit_id]['dnfCount'] += 1
                 reason = d['reasonRetired']
                 circuits_by_location[circuit_id]['dnfReasons'][reason] = \
@@ -91,7 +97,12 @@ def get_circuit_data():
         # Calculate DNF percentages and top reasons
         processed_circuits = []
         for circuit in circuits_by_location.values():
-            circuit['dnfPercentage'] = (circuit['dnfCount'] / (grand_prix_counts[circuit['country']]*20) * 100) if circuit['totalRaces'] > 0 else 0
+            # circuit['dnfPercentage'] = (circuit['dnfCount'] / (grand_prix_counts[circuit['grandPrixId']]*20) * 100) if circuit['totalRaces'] > 0 else 0
+            if circuit['country'] in grand_prix_counts:
+                circuit['dnfPercentage'] = (circuit['dnfCount'] / (grand_prix_counts[circuit['grandPrixId']]*20) * 100) if circuit['totalRaces'] > 0 else 0
+            else:
+                # Default to using totalRaces if the grandPrixId is not found in grand_prix_counts
+                circuit['dnfPercentage'] = (circuit['dnfCount'] / circuit['totalRaces'] * 100) if circuit['totalRaces'] > 0 else 0
             circuit['topReasons'] = sorted(
                 [(reason, count) for reason, count in circuit['dnfReasons'].items()],
                 key=lambda x: x[1],
@@ -102,6 +113,41 @@ def get_circuit_data():
         return jsonify({
             'status': 'success',
             'data': processed_circuits
+        })
+        
+    except Exception as e:
+        return jsonify({
+            'status': 'error',
+            'message': str(e)
+        }), 500
+    
+
+@app.route('/api/pcp-data', methods=['GET'])
+def get_pcp_data():
+    """Endpoint to get data for Parallel Coordinates Plot"""
+    try:
+        circuit_data = app.config['DATASETS'].get('circuit_data', [])
+        
+        # Process data for PCP
+        pcp_data = []
+        for d in circuit_data:
+            entry = {
+                'year': int(d['year']),
+                'circuitName': d.get('circuitId', 'Unknown'),
+                'circuitType': d.get('type', 'Unknown'),
+                'grid': int(d['gridPositionNumber']),
+                'laps': int(d['laps']),
+                'reasonRetired': d.get('reasonRetired', 'Unknown'),
+                'constructor': d.get('constructorId', 'Unknown'),
+                'engine': d.get('engineManufacturerId', 'Unknown'),
+                'tyre': d.get('tyreManufacturerId', 'Unknown'),
+                'country': d.get('countryId', 'Unknown'),
+            }
+            pcp_data.append(entry)
+        
+        return jsonify({
+            'status': 'success',
+            'data': pcp_data
         })
         
     except Exception as e:

@@ -47,31 +47,31 @@ function expandCard(card, cardId, cardTitle) {
     card.querySelector('.expand-button').setAttribute('title', 'Collapse visualization');
     
     // Clone the filter controls for the expanded view
-    const expandedControls = document.createElement('div');
-    expandedControls.className = 'expanded-controls';
-    expandedControls.innerHTML = `
-        <div class="filter-group">
-            <label for="${cardId}-season">Season:</label>
-            <select id="${cardId}-season" class="filter-select">
-                <option value="all">All Seasons</option>
-                <option value="2023">2023</option>
-                <option value="2022">2022</option>
-                <option value="2021">2021</option>
-                <option value="2020">2020</option>
-            </select>
-        </div>
-        <div class="filter-group">
-            <label for="${cardId}-team">Team:</label>
-            <select id="${cardId}-team" class="filter-select">
-                <option value="all">All Teams</option>
-                <option value="mercedes">Mercedes</option>
-                <option value="redbull">Red Bull</option>
-                <option value="ferrari">Ferrari</option>
-                <option value="mclaren">McLaren</option>
-            </select>
-        </div>
-        <button class="button dashboard-button">Apply Filters</button>
-    `;
+    // const expandedControls = document.createElement('div');
+    // expandedControls.className = 'expanded-controls';
+    // expandedControls.innerHTML = `
+    //     <div class="filter-group">
+    //         <label for="${cardId}-season">Season:</label>
+    //         <select id="${cardId}-season" class="filter-select">
+    //             <option value="all">All Seasons</option>
+    //             <option value="2023">2023</option>
+    //             <option value="2022">2022</option>
+    //             <option value="2021">2021</option>
+    //             <option value="2020">2020</option>
+    //         </select>
+    //     </div>
+    //     <div class="filter-group">
+    //         <label for="${cardId}-team">Team:</label>
+    //         <select id="${cardId}-team" class="filter-select">
+    //             <option value="all">All Teams</option>
+    //             <option value="mercedes">Mercedes</option>
+    //             <option value="redbull">Red Bull</option>
+    //             <option value="ferrari">Ferrari</option>
+    //             <option value="mclaren">McLaren</option>
+    //         </select>
+    //     </div>
+    //     <button class="button dashboard-button">Apply Filters</button>
+    // `;
     
     // Add classes for expanded view
     card.classList.add('expanded-view');

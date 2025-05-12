@@ -15,6 +15,7 @@
     <script src="{{ url_for('static', filename='js/tyre_vs_engine_failure.js') }}" defer></script>
     <script src="{{ url_for('static', filename='js/driver_experience_vs_dnfs.js') }}" defer></script>
     <script src="{{ url_for('static', filename='js/circuit_risk_index.js') }}" defer></script>
+    <script src="{{ url_for('static', filename='js/pcp_plot.js') }}" defer></script>
 </head>
 <body class="visualization-page">
     <header class="dashboard-header">
@@ -31,7 +32,7 @@
     </header>
 
     <div class="dashboard-grid">
-        <div id="dnfs-over-time" class="visualization-card">
+        <!-- <div id="dnfs-over-time" class="visualization-card">
             <h3>DNFs Over Time</h3>
             <button class="expand-button" title="Expand visualization">
                 <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -39,7 +40,7 @@
                 </svg>
             </button>
             <div class="viz-content"></div>
-        </div>
+        </div> -->
         
         <div id="failure-cause-breakdown" class="visualization-card">
             <h3>Failure Cause Breakdown</h3>
@@ -61,7 +62,7 @@
             <div class="viz-content"></div>
         </div>
         
-        <div id="tyre-vs-engine-failure" class="visualization-card">
+        <!-- <div id="tyre-vs-engine-failure" class="visualization-card">
             <h3>Tyre vs Engine Failures</h3>
             <button class="expand-button" title="Expand visualization">
                 <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -70,7 +71,7 @@
             </button>
             <div class="viz-content"></div>
         </div>
-        
+         -->
         <div id="driver-experience-vs-dnfs" class="visualization-card">
             <h3>Driver Experience vs DNFs</h3>
             <button class="expand-button" title="Expand visualization">
@@ -90,9 +91,20 @@
             </button>
             <div class="viz-content"></div>
         </div>
+        
+        <div id="pcp-plot" class="visualization-card" style="grid-column: span 2;">
+            <h3>Parallel Coordinates Plot</h3>
+            <button class="expand-button" title="Expand visualization">
+                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M3,3H9V5H5V9H3V3M21,3V9H19V5H15V3H21M3,21V15H5V19H9V21H3M19,21H15V19H19V15H21V21"/>
+                </svg>
+            </button>
+            <div class="viz-content"></div>
+        </div>
     </div>
+    
 
-    <div class="dashboard-controls">
+    <!-- <div class="dashboard-controls">
         <div class="filter-group">
             <label for="season-filter">Season:</label>
             <select id="season-filter" class="filter-select">
@@ -116,6 +128,6 @@
         </div>
 
         <button class="button dashboard-button">Apply Filters</button>
-    </div>
+    </div> -->
 </body>
 </html>
