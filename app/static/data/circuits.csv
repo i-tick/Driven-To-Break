@@ -1,0 +1,78 @@
+circuitId,latitude,longitude,name,fullName,previousNames,type,direction,placeName,countryId,length,turns,totalRacesHeld
+adelaide,-34.927222,138.617222,Adelaide,Adelaide Street Circuit,,STREET,CLOCKWISE,Adelaide,australia,3.78,16,11
+aida,34.915,134.221111,Aida,Okayama International Circuit,TI Circuit Aida,RACE,CLOCKWISE,Aida,japan,3.703,13,2
+ain-diab,33.578611,-7.6875,Ain-Diab,Ain-Diab Circuit,,ROAD,CLOCKWISE,Casablanca,morocco,7.618,18,1
+aintree,53.476944,-2.940556,Aintree,Aintree Motor Racing Circuit,,ROAD,CLOCKWISE,Aintree,united-kingdom,4.828,8,5
+anderstorp,57.264167,13.601389,Anderstorp Raceway,Anderstorp Raceway,Scandinavian Raceway,RACE,CLOCKWISE,Anderstorp,sweden,4.031,8,6
+austin,30.132778,-97.641111,Americas,Circuit of the Americas,,RACE,ANTI_CLOCKWISE,Austin,united-states-of-america,5.513,20,12
+avus,52.480556,13.251389,AVUS,AVUS,,ROAD,ANTI_CLOCKWISE,Berlin,germany,8.3,4,1
+bahrain,26.0325,50.510556,Bahrain,Bahrain International Circuit,,RACE,CLOCKWISE,Sakhir,bahrain,5.412,15,21
+baku,40.3725,49.853333,Baku,Baku City Circuit,,STREET,ANTI_CLOCKWISE,Baku,azerbaijan,6.003,20,8
+brands-hatch,51.356667,0.2625,Brands Hatch,Brands Hatch,,RACE,CLOCKWISE,Fawkham,united-kingdom,4.207,9,14
+bremgarten,46.95,7.410833,Bremgarten,Circuit Bremgarten,,ROAD,CLOCKWISE,Bern,switzerland,7.28,13,5
+buddh,28.350556,77.535,Buddh,Buddh International Circuit,,RACE,CLOCKWISE,Greater Noida,india,5.125,16,3
+buenos-aires,-34.694272,-58.459347,Juan y Oscar Gálvez,Autódromo Juan y Oscar Gálvez,Autódromo 17 de Octubre;Autódromo Municipal Ciudad de Buenos Aires;Autódromo Municipal del Parque Almirante Brown de la Ciudad de Buenos Aires;Autódromo Oscar Alfredo Gálvez,RACE,CLOCKWISE,Buenos Aires,argentina,4.259,19,20
+bugatti,47.937694,0.225611,Bugatti,Bugatti Circuit,,RACE,CLOCKWISE,Le Mans,france,4.185,14,1
+caesars-palace,36.116944,-115.175,Caesars Palace,Caesars Palace,,STREET,ANTI_CLOCKWISE,Las Vegas,united-states-of-america,3.65,14,2
+catalunya,41.57,2.261111,Catalunya,Circuit de Barcelona-Catalunya,,RACE,CLOCKWISE,Montmeló,spain,4.657,14,34
+clermont-ferrand,45.747222,3.038889,Charade,Charade Circuit,,ROAD,CLOCKWISE,Clermont-Ferrand,france,8.055,48,4
+dallas,32.781944,-96.765556,Fair Park,Fair Park,,STREET,ANTI_CLOCKWISE,Dallas,united-states-of-america,3.901,23,1
+detroit,42.32975,-83.040111,Detroit,Detroit Street Circuit,,STREET,ANTI_CLOCKWISE,Detroit,united-states-of-america,4.023,22,7
+dijon,47.3625,4.899167,Dijon-Prenois,Dijon-Prenois,,RACE,CLOCKWISE,Dijon,france,3.801,12,6
+donington,52.829806,-1.379556,Donington Park,Donington Park,,RACE,CLOCKWISE,Leicestershire,united-kingdom,4.023,12,1
+east-london,-33.048611,27.873611,Prince George,Prince George Circuit,,RACE,CLOCKWISE,East London,south-africa,3.92,9,3
+estoril,38.750833,-9.394167,Estoril,Autódromo do Estoril,,RACE,CLOCKWISE,Estoril,portugal,4.36,13,13
+fuji,35.371667,138.926667,Fuji,Fuji Speedway,,RACE,CLOCKWISE,Oyama,japan,4.563,16,4
+hockenheimring,49.327778,8.565833,Hockenheimring,Hockenheimring,,RACE,CLOCKWISE,Hockenheim,germany,4.574,17,37
+hungaroring,47.582222,19.251111,Hungaroring,Hungaroring,,RACE,CLOCKWISE,Budapest,hungary,4.381,14,39
+imola,44.341111,11.713333,Enzo e Dino Ferrari,Autodromo Internazionale Enzo e Dino Ferrari,Autodromo Dino Ferrari,RACE,ANTI_CLOCKWISE,Imola,italy,4.909,19,31
+indianapolis,39.798333,-86.232778,Indianapolis,Indianapolis Motor Speedway,,RACE,CLOCKWISE,Indianapolis,united-states-of-america,4.192,13,19
+interlagos,-23.701111,-46.697222,José Carlos Pace,Autódromo José Carlos Pace,Interlagos,RACE,ANTI_CLOCKWISE,São Paulo,brazil,4.309,15,41
+istanbul,40.951667,29.405,Istanbul Park,Istanbul Park,Istanbul Otodrom,RACE,ANTI_CLOCKWISE,Istanbul,turkey,5.338,14,9
+jacarepagua,-22.975556,-43.395,Nelson Piquet,Autódromo Internacional Nelson Piquet,Jacarepaguá,RACE,ANTI_CLOCKWISE,Rio de Janeiro,brazil,5.031,11,10
+jarama,40.617111,-3.585583,Jarama,Circuito del Jarama,Circuito Permanente del Jarama,RACE,CLOCKWISE,Madrid,spain,3.314,14,9
+jeddah,21.543333,39.172778,Jeddah,Jeddah Corniche Circuit,,STREET,ANTI_CLOCKWISE,Jeddah,saudi-arabia,6.174,27,4
+jerez,36.708333,-6.034167,Jerez,Circuito de Jerez,Circuito Permanente de Jerez,RACE,CLOCKWISE,Jerez de la Frontera,spain,4.428,15,7
+kyalami,-25.998611,28.068889,Kyalami,Kyalami Racing Circuit,,RACE,ANTI_CLOCKWISE,Midrand,south-africa,4.261,13,20
+las-vegas,36.175,-115.136389,Las Vegas,Las Vegas Street Circuit,,STREET,ANTI_CLOCKWISE,Las Vegas,united-states-of-america,6.201,17,2
+long-beach,33.766389,-118.192778,Long Beach,Long Beach,,STREET,CLOCKWISE,Long Beach,united-states-of-america,3.275,18,8
+lusail,25.49,51.454167,Lusail,Lusail International Circuit,,RACE,CLOCKWISE,Lusail,qatar,5.419,16,3
+magny-cours,46.863242,3.164228,Magny-Cours,Circuit de Nevers Magny-Cours,,RACE,CLOCKWISE,Nevers,france,4.411,17,18
+marina-bay,1.291531,103.86385,Marina Bay,Marina Bay Street Circuit,,STREET,ANTI_CLOCKWISE,Singapore,singapore,4.94,19,15
+melbourne,-37.849722,144.968333,Melbourne,Melbourne Grand Prix Circuit,Albert Park Circuit,STREET,CLOCKWISE,Melbourne,australia,5.278,14,28
+mexico-city,19.404197,-99.088747,Hermanos Rodríguez,Autódromo Hermanos Rodríguez,Autódromo Ricardo Rodríguez,RACE,CLOCKWISE,Mexico City,mexico,4.304,17,24
+miami,25.958056,-80.238889,Miami,Miami International Autodrome,,STREET,ANTI_CLOCKWISE,Miami Gardens,united-states-of-america,5.412,19,3
+monaco,43.734722,7.420556,Monaco,Circuit de Monaco,,STREET,CLOCKWISE,Monte Carlo,monaco,3.337,19,70
+monsanto,38.719722,-9.203056,Monsanto,Circuito de Monsanto,,STREET,CLOCKWISE,Lisbon,portugal,5.44,9,1
+mont-tremblant,46.187707,-74.609936,Mont-Tremblant,Circuit Mont-Tremblant,,RACE,CLOCKWISE,Mont-Tremblant,canada,4.265,15,2
+montjuic,41.366389,2.151667,Montjuïc,Circuito de Montjuïc,,STREET,ANTI_CLOCKWISE,Barcelona,spain,3.79,12,4
+montreal,45.500578,-73.522461,Gilles Villeneuve,Circuit Gilles Villeneuve,Île Notre-Dame Circuit,STREET,CLOCKWISE,Montreal,canada,4.361,13,43
+monza,45.620556,9.289444,Monza,Autodromo Nazionale Monza,,RACE,CLOCKWISE,Monza,italy,5.793,11,74
+mosport,44.05,-78.677778,Mosport,Canadian Tire Motorsport Park,Mosport Park;Mosport International Raceway,RACE,CLOCKWISE,Bowmanville,canada,3.957,10,8
+mugello,43.9975,11.371944,Mugello,Autodromo Internazionale del Mugello,,RACE,CLOCKWISE,Scarperia e San Piero,italy,5.245,15,1
+nivelles,50.621111,4.326944,Nivelles-Baulers,Nivelles-Baulers,,RACE,CLOCKWISE,Nivelles,belgium,3.724,7,2
+nurburgring,50.335556,6.9475,Nürburgring,Nürburgring,,RACE,CLOCKWISE,Nürburg,germany,5.148,15,41
+paul-ricard,43.250556,5.791667,Paul Ricard,Circuit Paul Ricard,,RACE,CLOCKWISE,Le Castellet,france,5.842,15,18
+pedralbes,41.390278,2.116667,Pedralbes,Pedralbes Circuit,,STREET,CLOCKWISE,Barcelona,spain,6.316,6,2
+pescara,42.475,14.150833,Pescara,Pescara Circuit,,ROAD,CLOCKWISE,Pescara,italy,25.579,24,1
+phoenix,33.447917,-112.074583,Phoenix,Phoenix Street Circuit,,STREET,ANTI_CLOCKWISE,Phoenix,united-states-of-america,3.721,15,3
+portimao,37.221944,-8.629444,Portimão,Algarve International Circuit,,RACE,CLOCKWISE,Portimão,portugal,4.653,15,2
+porto,41.170472,-8.67325,Boavista,Circuito da Boavista,,STREET,ANTI_CLOCKWISE,Porto,portugal,7.406,19,2
+reims,49.254075,3.930561,Reims-Gueux,Reims-Gueux,,ROAD,CLOCKWISE,Reims,france,8.302,7,11
+riverside,33.937,-117.272556,Riverside,Riverside International Raceway,,RACE,CLOCKWISE,Riverside,united-states-of-america,5.271,9,1
+rouen,49.330639,1.004583,Rouen-Les-Essarts,Rouen-Les-Essarts,,ROAD,CLOCKWISE,Rouen,france,6.542,12,5
+sebring,27.454741,-81.348267,Sebring,Sebring International Raceway,,ROAD,CLOCKWISE,Sebring,united-states-of-america,8.36,17,1
+sepang,2.760556,101.7375,Sepang,Sepang International Circuit,,RACE,CLOCKWISE,Sepang,malaysia,5.543,15,19
+shanghai,31.338889,121.219722,Shanghai,Shanghai International Circuit,,RACE,CLOCKWISE,Shanghai,china,5.451,16,18
+silverstone,52.078611,-1.016944,Silverstone,Silverstone Circuit,,RACE,CLOCKWISE,Silverstone,united-kingdom,5.891,18,59
+sochi,43.410278,39.968271,Sochi,Sochi Autodrom,Sochi International Street Circuit;Sochi Olympic Park Circuit,ROAD,CLOCKWISE,Sochi,russia,5.848,18,8
+spa-francorchamps,50.437222,5.971389,Spa-Francorchamps,Circuit de Spa-Francorchamps,,RACE,CLOCKWISE,Spa,belgium,7.004,19,57
+spielberg,47.219722,14.764722,Red Bull Ring,Red Bull Ring,Österreichring;A1-Ring,RACE,CLOCKWISE,Spielberg,austria,4.318,10,38
+suzuka,34.843056,136.540556,Suzuka,Suzuka Circuit,,RACE,CLOCKWISE,Suzuka,japan,5.807,18,35
+valencia,39.458778,-0.325556,Valencia,Valencia Street Circuit,,STREET,CLOCKWISE,Valencia,spain,5.419,25,5
+watkins-glen,42.336944,-76.927222,Watkins Glen,Watkins Glen International,,RACE,CLOCKWISE,Watkins Glen,united-states-of-america,5.435,11,20
+yas-marina,24.467222,54.603056,Yas Marina,Yas Marina Circuit,,RACE,ANTI_CLOCKWISE,Abu Dhabi,united-arab-emirates,5.281,16,16
+yeongam,34.733333,126.416667,Korea,Korea International Circuit,,RACE,ANTI_CLOCKWISE,Yeongam,south-korea,5.615,18,4
+zandvoort,52.388819,4.540922,Zandvoort,Circuit Park Zandvoort,,RACE,CLOCKWISE,Zandvoort,netherlands,4.259,14,34
+zeltweg,47.202222,14.742222,Zeltweg,Zeltweg,,ROAD,CLOCKWISE,Zeltweg,austria,3.186,4,1
+zolder,50.988889,5.255556,Zolder,Circuit Zolder,,RACE,CLOCKWISE,Heusden-Zolder,belgium,4.262,15,10

@@ -71,8 +71,13 @@ function initCircuitRiskIndex() {
     // Load the world map data and circuit data
     Promise.all([
         d3.json("https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/world.geojson"),
-        d3.csv("/static/data/sampled.csv")
-    ]).then(function([worldData, circuitData]) {
+        fetch('/api/circuit-data', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        }).then(response => response.json())
+    ]).then(function([worldData, circuitResponse]) {
         
         // Remove loading indicator
         const loadingElement = vizContainer.querySelector('.loading');
@@ -80,89 +85,11 @@ function initCircuitRiskIndex() {
             loadingElement.remove();
         }
         
-        // Process circuit data to calculate DNF frequencies and extract circuit information
-        const circuitsByLocation = {};
-        
-        // Count how many circuit records we process
-        let processedCircuits = 0;
-        
-        circuitData.forEach(d => {
-            // Based on the CSV header, we need to use these column names:
-            // circuitid, latitude, longittude (note the typo in longitude)
-            const circuitId = d.circuitid;
-            const lat = d.latitude;
-            const lng = d.longittude; // Note: typo in the CSV column name
-            const reasonRetired = d.reasonRetired;
-            
-            if (circuitId && lat && lng) {
-                processedCircuits++;
-                const key = `${circuitId}`;
-                
-                if (!circuitsByLocation[key]) {
-                    circuitsByLocation[key] = {
-                        circuitId: circuitId,
-                        circuitName: d.circuitName || circuitId,
-                        lat: +lat,
-                        lng: +lng,
-                        country: d.country || "Unknown",
-                        // Use a random assignment for circuit type since it's not in the data
-                        circuitType: (Math.random() > 0.5 ? "street" : "road"),
-                        totalRaces: 0,
-                        dnfCount: 0,
-                        dnfReasons: {}
-                    };
-                }
-                
-                circuitsByLocation[key].totalRaces++;
-                
-                // Check if this entry is a DNF with a valid reason
-                if (d.positionText === "DNF" && reasonRetired) {
-                    circuitsByLocation[key].dnfCount++;
-                    
-                    // Track the DNF reason
-                    const reason = reasonRetired;
-                    if (!circuitsByLocation[key].dnfReasons[reason]) {
-                        circuitsByLocation[key].dnfReasons[reason] = 0;
-                    }
-                    circuitsByLocation[key].dnfReasons[reason]++;
-                }
-            }
-        });
-        
-        // Convert to array and calculate DNF percentage
-        const circuits = Object.values(circuitsByLocation).map(circuit => {
-            circuit.dnfPercentage = circuit.totalRaces > 0 ? (circuit.dnfCount / circuit.totalRaces) * 100 : 0;
-            
-            // Get top 3 DNF reasons
-            circuit.topReasons = Object.entries(circuit.dnfReasons)
-                .sort((a, b) => b[1] - a[1])
-                .slice(0, 3)
-                .map(([reason, count]) => `${reason} (${count})`);
-                
-            return circuit;
-        });
-        
-        // Add some sample data to enhance visualization if needed
-        if (circuits.length < 5) {
-            [
-                {name: "Monaco", lat: 43.734722, lng: 7.420556, country: "Monaco", type: "street", dnfPercentage: 15},
-                {name: "Silverstone", lat: 52.0706, lng: -1.0174, country: "UK", type: "road", dnfPercentage: 8},
-                {name: "Monza", lat: 45.6156, lng: 9.2811, country: "Italy", type: "road", dnfPercentage: 12},
-                {name: "Spa", lat: 50.4372, lng: 5.9714, country: "Belgium", type: "road", dnfPercentage: 10},
-                {name: "Suzuka", lat: 34.8431, lng: 136.5414, country: "Japan", type: "road", dnfPercentage: 7}
-            ].forEach(sample => {
-                circuits.push({
-                    circuitId: sample.name.toLowerCase(),
-                    circuitName: sample.name,
-                    lat: sample.lat,
-                    lng: sample.lng,
-                    country: sample.country,
-                    circuitType: sample.type,
-                    dnfPercentage: sample.dnfPercentage,
-                    topReasons: ["Engine failure (2)", "Collision (1)"]
-                });
-            });
+        if (circuitResponse.status !== 'success') {
+            throw new Error(circuitResponse.message || 'Failed to load circuit data');
         }
+        
+        const circuits = circuitResponse.data;
         
         // Calculate map dimensions to fit the container while maintaining aspect ratio
         const mapWidth = width;
@@ -190,17 +117,22 @@ function initCircuitRiskIndex() {
             .attr("fill", "#2A2A2A")
             .attr("stroke", "#555")
             .attr("stroke-width", 0.5)
-            .attr("vector-effect", "non-scaling-stroke");  // Keep stroke width constant when zooming
+            .attr("vector-effect", "non-scaling-stroke");
             
-        // Create a color scale for circuit types
+        // Create a color scale for circuit types with intensity based on DNF counts
         const circuitTypeColor = d3.scaleOrdinal()
-            .domain(["road", "street"])
-            .range(["#4CAF50", "#FF5722"]);
+            .domain(["street", "race", "road"])
+            .range(["#4CAF50", "#FF5722", "#00BCD4"]);
+
+        // Create a scale for color intensity based on DNF percentage
+        const colorIntensityScale = d3.scaleLinear()
+            .domain([0, d3.max(circuits, d => d.dnfPercentage) || 20])
+            .range([0.3, 1]);
             
-        // Create a scale for circle size based on DNF percentage - using smaller range
+        // Create a scale for circle size based on DNF percentage
         const sizeScale = d3.scaleLinear()
             .domain([0, d3.max(circuits, d => d.dnfPercentage) || 20])
-            .range([3, 12]);  // Smaller size range for more elegant appearance
+            .range([3, 12]);
             
         // Add circuit locations as circles
         const circuitsGroup = svg.append("g")
@@ -219,16 +151,24 @@ function initCircuitRiskIndex() {
                 return point ? point[1] : 0;
             })
             .attr("r", d => sizeScale(d.dnfPercentage))
-            .attr("fill", d => circuitTypeColor(d.circuitType))
+            .attr("fill", d => {
+                const baseColor = circuitTypeColor(d.circuitType);
+                const intensity = colorIntensityScale(d.dnfPercentage);
+                return d3.color(baseColor).copy({opacity: intensity});
+            })
             .attr("stroke", "#fff")
             .attr("stroke-width", 0.3)
             .attr("opacity", 0.85)
-            .attr("class", d => `circuit-point ${d.circuitType}`)
+            .attr("class", d => {
+                const className = `circuit-point ${d.circuitType}`;
+                console.log(`Assigning class: ${className} to circuit: ${d.circuitName}`);
+                return className;
+            })
             .on("mouseover", function(event, d) {
                 d3.select(this)
                     .attr("stroke-width", 1.5)
                     .attr("opacity", 1)
-                    .attr("r", d => sizeScale(d.dnfPercentage) * 1.2); // Slightly larger on hover
+                    .attr("r", d => sizeScale(d.dnfPercentage) * 1.2);
                     
                 tooltip.transition()
                     .duration(200)
@@ -236,7 +176,7 @@ function initCircuitRiskIndex() {
                     
                 let tooltipContent = `
                     <strong>${d.circuitName}</strong><br/>
-                    Country: ${d.country || "Unknown"}<br/>
+                    Country: ${d.country}<br/>
                     Circuit Type: ${d.circuitType}<br/>
                     DNF Rate: ${d.dnfPercentage.toFixed(1)}%<br/>
                     <hr style="margin: 5px 0; border-color: #444;">
@@ -244,8 +184,8 @@ function initCircuitRiskIndex() {
                 `;
                 
                 if (d.topReasons && d.topReasons.length > 0) {
-                    d.topReasons.forEach(reason => {
-                        tooltipContent += `- ${reason}<br/>`;
+                    d.topReasons.forEach(([reason, count]) => {
+                        tooltipContent += `- ${reason} (${count})<br/>`;
                     });
                 } else {
                     tooltipContent += "No DNF data available";
@@ -283,33 +223,60 @@ function initCircuitRiskIndex() {
                     .attr("r", d => sizeScale(d.dnfPercentage) / scale);
             });
             
-        // Add a legend for circuit types
+        // Add a legend for circuit types with intensity gradient
         const legend = svg.append("g")
             .attr("class", "legend")
-            .attr("transform", `translate(20, ${height - 40})`);
+            .attr("transform", `translate(20, ${height - 80})`);
             
-        const circuitTypes = ["road", "street"];
+        const circuitTypes = ["road", "race", "street"];
         
-        legend.selectAll("rect")
+        // Add base color rectangles
+        legend.selectAll("rect.base")
             .data(circuitTypes)
             .enter()
             .append("rect")
+            .attr("class", "base")
             .attr("x", 0)
-            .attr("y", (d, i) => i * 20)
+            .attr("y", (d, i) => i * 25)
             .attr("width", 12)
             .attr("height", 12)
             .attr("rx", 2)
             .attr("fill", d => circuitTypeColor(d));
             
+        // Add intensity gradient rectangles
+        legend.selectAll("rect.intensity")
+            .data(circuitTypes)
+            .enter()
+            .append("rect")
+            .attr("class", "intensity")
+            .attr("x", 15)
+            .attr("y", (d, i) => i * 25)
+            .attr("width", 12)
+            .attr("height", 12)
+            .attr("rx", 2)
+            .attr("fill", d => {
+                const baseColor = circuitTypeColor(d);
+                return d3.color(baseColor).copy({opacity: 0.8});
+            });
+            
+        // Add labels
         legend.selectAll("text")
             .data(circuitTypes)
             .enter()
             .append("text")
-            .attr("x", 18)
-            .attr("y", (d, i) => i * 20 + 9)
+            .attr("x", 35)
+            .attr("y", (d, i) => i * 25 + 9)
             .text(d => d.charAt(0).toUpperCase() + d.slice(1) + " Circuit")
             .attr("fill", "#ddd")
             .style("font-size", "11px");
+
+        // Add intensity explanation
+        legend.append("text")
+            .attr("x", 0)
+            .attr("y", circuitTypes.length * 25 + 20)
+            .text("Color intensity indicates DNF rate")
+            .attr("fill", "#ddd")
+            .style("font-size", "10px");
             
         // Add controls for filtering by circuit type
         const controls = d3.select(vizContainer)
@@ -335,7 +302,7 @@ function initCircuitRiskIndex() {
                 d3.selectAll(".circuit-filter").classed("active", false);
                 d3.select(this).classed("active", true);
                 svg.selectAll(".circuit-point").style("display", "none");
-                svg.selectAll(".road").style("display", "block");
+                svg.selectAll(".ROAD").style("display", "block");
             });
             
         controls.append("button")
@@ -346,7 +313,18 @@ function initCircuitRiskIndex() {
                 d3.selectAll(".circuit-filter").classed("active", false);
                 d3.select(this).classed("active", true);
                 svg.selectAll(".circuit-point").style("display", "none");
-                svg.selectAll(".street").style("display", "block");
+                svg.selectAll(".STREET").style("display", "block");
+            });
+        
+        controls.append("button")
+            .attr("class", "button circuit-filter")
+            .attr("data-type", "road")
+            .text("Race Circuits")
+            .on("click", function() {
+                d3.selectAll(".circuit-filter").classed("active", false);
+                d3.select(this).classed("active", true);
+                svg.selectAll(".circuit-point").style("display", "none");
+                svg.selectAll(".RACE").style("display", "block");
             });
             
         // Add a reset zoom button

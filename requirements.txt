@@ -4,3 +4,5 @@ numpy
 matplotlib
 gunicorn
 scikit-learn
+python-dotenv
+geopy
