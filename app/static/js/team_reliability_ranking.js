@@ -75,6 +75,16 @@ function createTeamReliabilityChart() {
             .style("font-weight", "bold")
             .style("fill", "#ffffff")
             .text("Team Reliability Trends (DNFs Over Time)");
+
+        // Add interaction hint
+        svg.append("text")
+            .attr("x", width / 2)
+            .attr("y", -margin.top / 2 + 20)
+            .attr("text-anchor", "middle")
+            .style("font-size", isExpanded ? "14px" : "12px")
+            .style("font-style", "italic")
+            .style("fill", "#cccccc")
+            .text("Click on a team to filter the Driver Experience vs DNFs chart");
         
         // Load and process data
         fetch('/api/team-reliability', {
@@ -177,6 +187,7 @@ function createTeamReliabilityChart() {
                 .attr("stroke", "#2a2a2a")
                 .attr("stroke-width", 0.5)
                 .attr("opacity", 0.8)
+                .style("cursor", "pointer") // Add pointer cursor to indicate clickability
                 .on("mouseover", function(event, d) {
                     const team = d.key;
                     
@@ -201,7 +212,8 @@ function createTeamReliabilityChart() {
                         <strong>Team:</strong> ${formatTeamName(team)}<br>
                         <strong>Year:</strong> ${year}<br>
                         <strong>DNFs:</strong> ${dnfs}<br>
-                        <strong>Total DNFs:</strong> ${teamData.find(t => t.team === team).total}
+                        <strong>Total DNFs:</strong> ${teamData.find(t => t.team === team).total}<br>
+                        <span style="font-style: italic; color: #ffcc00;">Click to filter Driver Experience vs DNFs chart</span>
                     `)
                     .style("left", (mouseX + 10) + "px")
                     .style("top", (mouseY - 15) + "px");
@@ -217,6 +229,63 @@ function createTeamReliabilityChart() {
                         .style("opacity", 0);
                 })
                 .on("click", function(event, d) {
+                    // Highlight the selected team in the visualization
+                    svg.selectAll(".stream-layer")
+                        .attr("opacity", 0.3)
+                        .attr("stroke-width", "0.5px");
+                    
+                    d3.select(this)
+                        .attr("opacity", 1)
+                        .attr("stroke", "#ffffff")
+                        .attr("stroke-width", "2px");
+                    
+                    const team = d.key;
+                    const teamName = formatTeamName(team);
+                    
+                    // Show selection notification
+                    let notification = d3.select(vizContainer).select(".selection-notification");
+                    
+                    if (notification.empty()) {
+                        notification = d3.select(vizContainer)
+                            .append("div")
+                            .attr("class", "selection-notification")
+                            .style("position", "absolute")
+                            .style("top", "10px")
+                            .style("right", "10px")
+                            .style("background", "rgba(21, 21, 30, 0.9)")
+                            .style("border", "1px solid #e10600")
+                            .style("border-radius", "4px")
+                            .style("padding", "10px")
+                            .style("color", "#ffffff")
+                            .style("font-size", "12px")
+                            .style("z-index", "100");
+                    }
+                    
+                    notification.html(`
+                        <strong>Selected:</strong> ${teamName}<br>
+                        <span style="font-size: 11px;">Driver Experience vs DNFs chart filtered</span><br>
+                        <button class="clear-filter" style="margin-top: 5px; background: #e10600; color: white; border: none; padding: 3px 8px; border-radius: 3px; cursor: pointer;">Clear Filter</button>
+                    `)
+                    .style("opacity", 1);
+                    
+                    // Add clear filter button functionality
+                    notification.select(".clear-filter").on("click", function() {
+                        // Reset team selection
+                        svg.selectAll(".stream-layer")
+                            .attr("opacity", 0.8)
+                            .attr("stroke", "#2a2a2a")
+                            .attr("stroke-width", "0.5px");
+                        
+                        // Hide notification
+                        notification.style("opacity", 0);
+                        
+                        // Emit event to clear filter
+                        window.dispatchEvent(new CustomEvent('teamSelected', { detail: { team: 'all' } }));
+                        
+                        // Prevent event propagation
+                        event.stopPropagation();
+                    });
+                    
                     // Emit a custom event for cross-filtering by team
                     window.dispatchEvent(new CustomEvent('teamSelected', { detail: { team: d.key } }));
                 });
@@ -287,6 +356,17 @@ function createTeamReliabilityChart() {
                 .attr("y", 12.5)
                 .attr("fill", "#ffffff")
                 .text(d => formatTeamName(d));
+            
+            // Add interactive legend feature
+            legend.style("cursor", "pointer")
+                .on("click", function(event, d) {
+                    // Simulate clicking on the corresponding stream layer
+                    const streamLayer = svg.selectAll(".stream-layer")
+                        .filter(data => data.key === d);
+                    
+                    // Trigger click event on the stream layer
+                    streamLayer.dispatch("click", { bubbles: true });
+                });
             
             // Add filters
             function updateChart() {

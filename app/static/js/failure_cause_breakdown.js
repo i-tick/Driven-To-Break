@@ -36,6 +36,11 @@ window.addEventListener('circuitSelected', function(e) {
     createFailureCauseTreemap({ circuitId, circuitName });
 });
 
+// Remove any stray tooltips when the page loads
+document.addEventListener('DOMContentLoaded', function() {
+    d3.selectAll('.treemap-tooltip').remove();
+});
+
 function createFailureCauseTreemap(filter = {}) {
     try {
         // Check for D3 again just to be safe
@@ -60,8 +65,9 @@ function createFailureCauseTreemap(filter = {}) {
         const width = vizContainer.clientWidth - margin.left - margin.right;
         const height = vizContainer.clientHeight - margin.top - margin.bottom;
         
-        // Clear any existing SVG
+        // Clear any existing SVG and tooltips
         d3.select(vizContainer).selectAll("*").remove();
+        d3.selectAll('.treemap-tooltip').remove();
         
         // Create SVG with responsive sizing
         const svg = d3.select(vizContainer)
@@ -128,19 +134,21 @@ function createFailureCauseTreemap(filter = {}) {
                     .round(true)
                     (root);
                 
-                // Create tooltip
-                const tooltip = d3.select(vizContainer)
+                // Create tooltip - append to document.body for maximum visibility
+                const tooltip = d3.select("body")
                     .append("div")
-                    .attr("class", "tooltip")
+                    .attr("class", "treemap-tooltip")
                     .style("opacity", 0)
-                    .style("position", "absolute")
+                    .style("position", "fixed") // Using fixed instead of absolute positioning
                     .style("background", "#15151e")
                     .style("border", "1px solid #e10600")
                     .style("border-radius", "4px")
                     .style("padding", "10px")
                     .style("color", "#ffffff")
                     .style("pointer-events", "none")
-                    .style("width", "auto");
+                    .style("z-index", "10000") // Very high z-index to ensure visibility
+                    .style("box-shadow", "0 0 10px rgba(0,0,0,0.5)")
+                    .style("max-width", "250px");
                     
                 // Create treemap cells
                 const cell = svg.selectAll("g")
@@ -151,24 +159,48 @@ function createFailureCauseTreemap(filter = {}) {
                     .attr("class", "treemap-cell")
                     .on("mouseover", function(event, d) {
                         // Show tooltip
-                        const [mouseX, mouseY] = d3.pointer(event, vizContainer);
-                        
                         tooltip.transition()
                             .duration(200)
-                            .style("opacity", 0.9);
+                            .style("opacity", 0.95);
                         
                         tooltip.html(`
                             <strong>${d.data.name}</strong><br>
                             Count: ${d.data.count}<br>
                             Percentage: ${d.data.percentage}%
-                        `)
-                        .style("left", (mouseX + 10) + "px")
-                        .style("top", (mouseY - 15) + "px");
+                        `);
+                        
+                        // Position tooltip relative to the viewport
+                        const tooltipWidth = parseInt(tooltip.style("width"));
+                        const windowWidth = window.innerWidth;
+                        
+                        // Calculate position - keep within viewport bounds
+                        let left = event.clientX + 10;
+                        if (left + 250 > windowWidth) {
+                            left = event.clientX - 260;
+                        }
+                        
+                        tooltip
+                            .style("left", left + "px")
+                            .style("top", (event.clientY - 10) + "px");
                         
                         // Highlight cell
                         d3.select(this).select("rect")
                             .style("stroke", "#ffffff")
                             .style("stroke-width", "2px");
+                    })
+                    .on("mousemove", function(event) {
+                        // Update tooltip position as mouse moves
+                        const tooltipWidth = parseInt(tooltip.style("width"));
+                        const windowWidth = window.innerWidth;
+                        
+                        let left = event.clientX + 10;
+                        if (left + 250 > windowWidth) {
+                            left = event.clientX - 260;
+                        }
+                        
+                        tooltip
+                            .style("left", left + "px")
+                            .style("top", (event.clientY - 10) + "px");
                     })
                     .on("mouseout", function() {
                         // Hide tooltip
@@ -194,7 +226,7 @@ function createFailureCauseTreemap(filter = {}) {
                             .attr("text-anchor", "middle")
                             .style("font-size", "14px")
                             .style("fill", "#ffffff")
-                            .text(`Filtered by: ${failureType}`);
+                            // .text(`Filtered by: ${failureType}`);
                         
                         // Remove other filter info if exists
                         svg.selectAll(".filter-info").filter((d, i, nodes) => nodes[i] !== filterInfo.node())
@@ -343,5 +375,12 @@ function createFailureCauseTreemap(filter = {}) {
 window.addEventListener("resize", function() {
     if (typeof d3 !== 'undefined') {
         createFailureCauseTreemap();
+    }
+});
+
+// Clean up tooltips when leaving the page or when components are removed
+window.addEventListener('beforeunload', function() {
+    if (typeof d3 !== 'undefined') {
+        d3.selectAll('.treemap-tooltip').remove();
     }
 }); 

@@ -332,54 +332,6 @@ function createDriverExperienceChart() {
                     .style('fill', '#cccccc')
                     .text('DNF Ratio');
                 
-                // Add brushing functionality if expanded
-                if (isExpanded) {
-                    const brush = d3.brush()
-                        .extent([[0, 0], [width, height]])
-                        .on('start brush end', brushed);
-                    
-                    // Append the brush to a separate group to keep it below the circles
-                    const brushGroup = svg.append('g')
-                        .attr('class', 'brush')
-                        .call(brush);
-                    
-                    // Bring the points to the front
-                    pointsGroup.raise();
-                    
-                    // Add brush instructions
-                    svg.append('text')
-                        .attr('x', width / 2)
-                        .attr('y', height + margin.bottom - 30)
-                        .attr('text-anchor', 'middle')
-                        .attr('class', 'brush-instructions')
-                        .style('fill', '#cccccc')
-                        .style('font-size', '14px')
-                        .text('Click and drag to brush and zoom into specific data points');
-                    
-                    function brushed(event) {
-                        let selection = event.selection;
-                        
-                        // If the brush is active (selection exists)
-                        if (selection) {
-                            // Get the selected coordinates
-                            const [[x0, y0], [x1, y1]] = selection;
-                            
-                            // Check each point to see if it falls within the brushed area
-                            pointsGroup.selectAll('.point').each(function(d) {
-                                const cx = xScale(d.totalRaces);
-                                const cy = yScale(d.dnfRatio);
-                                const isBrushed = (cx >= x0 && cx <= x1 && cy >= y0 && cy <= y1);
-                                
-                                // Style based on whether the point is brushed
-                                d3.select(this).attr('opacity', isBrushed ? 1.0 : 0.3);
-                            });
-                        } else {
-                            // If brush is cleared, reset all points
-                            pointsGroup.selectAll('.point').attr('opacity', 0.7);
-                        }
-                    }
-                }
-                
                 // Add legend for teams
                 const legendSpacing = isExpanded ? 25 : 20;
                 const legend = svg.append('g')

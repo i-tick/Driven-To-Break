@@ -15,6 +15,9 @@ document.addEventListener('DOMContentLoaded', function() {
     window.addEventListener('resize', debounce(function() {
         initPCPPlot();
     }, 250));
+    
+    // Clean up any stray tooltips on page load
+    d3.selectAll('.pcp-tooltip').remove();
 });
 
 function debounce(func, wait) {
@@ -75,13 +78,22 @@ function initPCPPlot() {
     const vizContainer = document.querySelector('#pcp-plot .viz-content');
     const isExpanded = vizContainer.closest('.expanded-view') !== null;
     
-    // Set the dimensions and margins of the graph
-    const margin = {top: 40, right: 60, bottom: 80, left: 60},
-          width = vizContainer.clientWidth - margin.left - margin.right,
-          height = (isExpanded ? vizContainer.clientHeight : 500) - margin.top - margin.bottom;
+    // Set the dimensions and margins of the graph with increased margins for labels
+    const margin = {
+        top: 60,           // Increased top margin for labels
+        right: 80,         // Increased right margin
+        bottom: 80,        // Same bottom margin
+        left: 80           // Increased left margin
+    };
+    
+    const width = vizContainer.clientWidth - margin.left - margin.right;
+    const height = (isExpanded ? vizContainer.clientHeight : 500) - margin.top - margin.bottom;
     
     // Clear any existing content
     vizContainer.innerHTML = '';
+    
+    // Remove any existing tooltips to avoid duplicates
+    d3.selectAll('.pcp-tooltip').remove();
     
     // Create the SVG container with dark theme styling
     const svg = d3.select(vizContainer)
@@ -90,7 +102,7 @@ function initPCPPlot() {
         .attr("height", height + margin.top + margin.bottom)
         .style("background-color", "#1a1a1a")
         .append("g")
-        .attr("transform", `translate(${margin.left},${margin.top})`);
+        .attr("transform", `translate(${margin.left}, ${margin.top})`);
     
     // Add loading indicator with theme styling
     const loadingDiv = document.createElement('div');
@@ -149,6 +161,27 @@ function initPCPPlot() {
                 .domain(d3.extent(pcpData, d => d.year))
                 .interpolator(d3.interpolateRdYlBu);
             
+            // Create tooltip once and reuse it
+            const tooltip = d3.select("body")
+                .append("div")
+                .attr("class", "pcp-tooltip")
+                .style("position", "fixed") // Use fixed instead of absolute for better visibility
+                .style("visibility", "hidden")
+                .style("background-color", "#2a2a2a")
+                .style("color", "#ffffff")
+                .style("padding", "10px")
+                .style("border", "1px solid #e10600")
+                .style("border-radius", "5px")
+                .style("box-shadow", "0 2px 8px rgba(0,0,0,0.5)")
+                .style("font-size", "14px")
+                .style("z-index", "10000") // Very high z-index
+                .style("pointer-events", "none")
+                .style("max-width", "300px");
+            
+            // Create a container for the lines that will be behind the axes
+            const linesGroup = svg.append("g")
+                .attr("class", "lines-group");
+                
             // Draw the axes with theme styling
             const g = svg.selectAll(".dimension")
                 .data(dimensions)
@@ -165,57 +198,38 @@ function initPCPPlot() {
             
             // Add background rectangles for axis labels first
             g.append("rect")
-                .attr("x", -60)
+                .attr("x", -75)
                 .attr("y", -38)
-                .attr("width", 120)
-                .attr("height", 26)
+                .attr("width", 150)  // Width is sufficient for longer labels
+                .attr("height", 30)
                 .attr("rx", 6)
                 .attr("fill", "#222")
-                .attr("opacity", 0.7);
+                .attr("opacity", 0.8);
                 
-            // Add axis labels with theme styling and improved visibility
+            // Add axis labels with theme styling to match the heading
             g.append("text")
                 .attr("text-anchor", "middle")
-                .attr("y", -22)
+                .attr("y", -20)
                 .attr("x", 0)
                 .style("font-weight", "bold")
                 .style("fill", "#fff")
-                .style("font-size", "18px")
-                .style("font-family", "sans-serif")
+                .style("font-size", isExpanded ? "16px" : "14px")  // Slightly reduced font size to fit in the space
+                .style("text-transform", "uppercase")
+                .style("font-family", "'Roboto', 'Arial', sans-serif")
+                .style("letter-spacing", "0.5px")
                 .style("pointer-events", "none")
-                .style("text-shadow", "0 0 8px #000, 0 0 2px #000, 0 0 2px #000")
-                .text(d => d.label);
+                .style("text-shadow", "0 0 6px rgba(0,0,0,0.8)")
+                .text(d => d.label.length > 15 ? d.label.substring(0, 15) + "..." : d.label); // Truncate very long labels
             
-            // Add axis labels and lines with theme styling
-            g.append("g")
-                .attr("class", "axis")
-                .each(function(d) {
-                    const axis = d.type === 'numeric' ? 
-                        d3.axisLeft(scales[d.name]) :
-                        d3.axisLeft(scales[d.name])
-                            .tickFormat(d => d.length > 10 ? d.substring(0, 10) + '...' : d);
-                    d3.select(this)
-                        .call(axis)
-                        .call(g => g.selectAll(".domain")
-                            .attr("stroke", "#888"))
-                        .call(g => g.selectAll(".tick line")
-                            .attr("stroke", "#888"))
-                        .call(g => g.selectAll(".tick text")
-                            .attr("fill", "#fff")
-                            .style("font-size", "13px")
-                            .style("font-family", "sans-serif")
-                            .style("text-shadow", "0 0 6px #000, 0 0 2px #000"));
-                });
-
-            // Draw the lines with enhanced styling
+            // Draw the lines with enhanced styling - now with curve interpolation
             const line = d3.line()
                 .defined(d => !isNaN(d.y))
                 .x(d => d.x)
-                .y(d => d.y);
+                .y(d => d.y)
+                .curve(d3.curveCardinal.tension(0.5)); // Use Cardinal curve with tension parameter
             
             // When drawing lines, add class 'pcp-line' and bind data
-            const path = svg.append("g")
-                .selectAll("path")
+            const path = linesGroup.selectAll("path")
                 .data(pcpData)
                 .enter().append("path")
                 .attr("class", "pcp-line")
@@ -228,8 +242,52 @@ function initPCPPlot() {
                 })
                 .style("fill", "none")
                 .style("stroke", d => colorScale(d.year))
-                .style("stroke-width", 1)
-                .style("opacity", 0.5);
+                .style("stroke-width", 1.5)  // Slightly increased line width for better visibility
+                .style("opacity", 0.5);      // Reduced opacity to help axis text stand out
+            
+            // Create axes container on top of lines
+            const axesGroup = svg.append("g")
+                .attr("class", "axes-group");
+                
+            // Add axis labels and lines with theme styling
+            axesGroup.selectAll(".dimension-axis")
+                .data(dimensions)
+                .enter()
+                .append("g")
+                .attr("class", "dimension-axis")
+                .attr("transform", (d, i) => `translate(${i * (width / (dimensions.length - 1))}, 0)`)
+                .each(function(d) {
+                    const axis = d.type === 'numeric' ? 
+                        d3.axisLeft(scales[d.name]) :
+                        d3.axisLeft(scales[d.name])
+                            .tickFormat(d => d && d.length > 10 ? d.substring(0, 10) + '...' : d);
+                    
+                    // Apply the axis
+                    const axisGroup = d3.select(this)
+                        .call(axis);
+                    
+                    // Style the axis line
+                    axisGroup.select(".domain")
+                        .attr("stroke", "#fff")
+                        .attr("stroke-width", 1.5);
+                    
+                    // Style the tick lines to be more visible
+                    axisGroup.selectAll(".tick line")
+                        .attr("stroke", "#fff")
+                        .attr("stroke-width", 1.5)
+                        .attr("x2", -4); // Extend tick lines
+                    
+                    // Style the tick text for maximum visibility
+                    axisGroup.selectAll(".tick text")
+                        .attr("fill", "#ffffff")
+                        .style("font-weight", "bold")
+                        .style("font-size", "13px")
+                        .style("font-family", "'Roboto', 'Arial', sans-serif")
+                        .style("stroke", "#000")  // Add black outline
+                        .style("stroke-width", "0.5px")  // Thin outline
+                        .style("paint-order", "stroke fill")  // Draw stroke first, then fill
+                        .style("text-shadow", "0 0 4px #000, 0 0 4px #000, 0 0 4px #000"); // Multiple shadows for stronger effect
+                });
             
             // Add brushing with theme styling
             g.append("g")
@@ -256,23 +314,14 @@ function initPCPPlot() {
                             .attr("stroke", "#666"));
                 });
             
-            // Add tooltips with theme styling
+            // Add tooltips with theme styling and improved visibility
             path.on("mouseover", function(event, d) {
                 d3.select(this)
                     .style("stroke-width", 3)
-                    .style("opacity", 1);
+                    .style("opacity", 1)
+                    .style("stroke", "#e10600"); // Highlight with brand color
                 
-                const tooltip = d3.select("body").append("div")
-                    .attr("class", "tooltip")
-                    .style("position", "absolute")
-                    .style("background-color", "#2a2a2a")
-                    .style("color", "#ffffff")
-                    .style("padding", "10px")
-                    .style("border", "1px solid #444")
-                    .style("border-radius", "5px")
-                    .style("box-shadow", "0 2px 4px rgba(0,0,0,0.2)")
-                    .style("font-size", "12px");
-                
+                // Format tooltip content
                 tooltip.html(`
                     <strong>Year:</strong> ${d.year}<br>
                     <strong>Grid:</strong> ${d.grid}<br>
@@ -281,15 +330,58 @@ function initPCPPlot() {
                     <strong>Status:</strong> ${d.status}<br>
                     <strong>Reason:</strong> ${d.reasonRetired}<br>
                     <strong>Constructor:</strong> ${d.constructor}<br>
-                `)
-                .style("left", (event.pageX + 10) + "px")
-                .style("top", (event.pageY - 28) + "px");
+                `);
+                
+                // Calculate position - keep tooltip within viewport bounds
+                const windowWidth = window.innerWidth;
+                const windowHeight = window.innerHeight;
+                let left = event.clientX + 15;
+                let top = event.clientY - 20;
+                
+                // Check if tooltip would go off-screen to the right
+                if (left + 300 > windowWidth) {
+                    left = event.clientX - 315;
+                }
+                
+                // Check if tooltip would go off-screen at the bottom
+                if (top + 200 > windowHeight) {
+                    top = event.clientY - 210;
+                }
+                
+                // Position and show tooltip
+                tooltip
+                    .style("left", left + "px")
+                    .style("top", Math.max(10, top) + "px")
+                    .style("visibility", "visible");
+            })
+            .on("mousemove", function(event) {
+                // Update tooltip position when mouse moves
+                const windowWidth = window.innerWidth;
+                const windowHeight = window.innerHeight;
+                let left = event.clientX + 15;
+                let top = event.clientY - 20;
+                
+                // Keep tooltip within viewport bounds
+                if (left + 300 > windowWidth) {
+                    left = event.clientX - 315;
+                }
+                
+                if (top + 200 > windowHeight) {
+                    top = event.clientY - 210;
+                }
+                
+                tooltip
+                    .style("left", left + "px")
+                    .style("top", Math.max(10, top) + "px");
             })
             .on("mouseout", function() {
+                // Restore original line style and hide tooltip
                 d3.select(this)
-                    .style("stroke-width", 1)
-                    .style("opacity", 0.5);
-                d3.selectAll(".tooltip").remove();
+                    .style("stroke-width", 1.5)
+                    .style("opacity", 0.5)
+                    .style("stroke", d => colorScale(d.year));
+                
+                tooltip.style("visibility", "hidden");
             });
             
             // Drag functions
@@ -303,6 +395,11 @@ function initPCPPlot() {
                 
                 // Update the position of the current axis
                 thisElem.attr("transform", `translate(${xPos}, 0)`);
+                
+                // Also update the corresponding axis in the axesGroup
+                axesGroup.selectAll(".dimension-axis")
+                    .filter((axis, i) => axis.name === d.name)
+                    .attr("transform", `translate(${xPos}, 0)`);
                 
                 // Determine new order of dimensions based on x positions
                 const dimensions_copy = [...dimensions];
@@ -352,6 +449,11 @@ function initPCPPlot() {
                 positions.forEach((p, i) => {
                     const newX = i * (width / (dimensions.length - 1));
                     d3.select(p.elem).attr("transform", `translate(${newX}, 0)`);
+                    
+                    // Update axis positions too
+                    axesGroup.selectAll(".dimension-axis")
+                        .filter((axis) => axis.name === p.dim.name)
+                        .attr("transform", `translate(${newX}, 0)`);
                 });
                 
                 // Update the paths with the new even spacing
@@ -377,3 +479,8 @@ function initPCPPlot() {
 
     addCountryResetButton();
 }
+
+// Clean up tooltips when the window is about to unload
+window.addEventListener('beforeunload', function() {
+    d3.selectAll('.pcp-tooltip').remove();
+});

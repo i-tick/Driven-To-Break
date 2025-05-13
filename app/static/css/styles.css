@@ -4,6 +4,9 @@ body {
     padding: 0;
     background-color: #121212;
     color: #ffffff;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
 }
 
 header {
@@ -64,7 +67,11 @@ nav ul li a:hover {
 }
 
 main {
-    padding: 30px 15%;
+    padding: 0 15%;
+    flex: 1 0 auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
 }
 
 section {
@@ -127,6 +134,8 @@ section {
     text-transform: uppercase;
     font-weight: 600;
     letter-spacing: 0.5px;
+    text-decoration: none;
+    display: inline-block;
 }
 
 .button:hover {
@@ -139,6 +148,7 @@ footer {
     text-align: center;
     padding: 15px 0;
     border-top: 1px solid #333;
+    margin-top: auto;
 }
 
 .features {
@@ -175,6 +185,42 @@ footer {
     font-size: 16px;
     margin: 0 10px;
     text-decoration: none;
+}
+
+.content-wrapper {
+    flex: 1 0 auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.hero-section {
+    margin-bottom: 30px;
+}
+
+.features-section {
+    margin-bottom: 0;
+}
+
+/* Home page specific styles */
+.home-page {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.home-page .content-wrapper {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.home-page main {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
 }
 
 @media (max-width: 768px) {
@@ -706,6 +752,22 @@ footer {
     border: 1px solid #444;
     background: #252525;
     color: #fff;
+}
+
+#team-era-filter {
+    padding: 8px 15px;
+    border-radius: 20px;
+    border: 1px solid #444;
+    background: #252525;
+    color: #fff;
+    width: 170px;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    background-image: url("data:image/svg+xml;utf8,<svg fill='white' height='24' viewBox='0 0 24 24' width='24' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/><path d='M0 0h24v24H0z' fill='none'/></svg>");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    cursor: pointer;
 }
 
 .driver-card {
