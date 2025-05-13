@@ -41,7 +41,10 @@ document.addEventListener('DOMContentLoaded', function() {
     d3.selectAll('.treemap-tooltip').remove();
 });
 
+let lastTreemapFilter = null;
+
 function createFailureCauseTreemap(filter = {}) {
+    lastTreemapFilter = filter;
     try {
         // Check for D3 again just to be safe
         if (typeof d3 === 'undefined') {
@@ -383,4 +386,8 @@ window.addEventListener('beforeunload', function() {
     if (typeof d3 !== 'undefined') {
         d3.selectAll('.treemap-tooltip').remove();
     }
+});
+
+window.addEventListener('resetGeoFilters', function() {
+    createFailureCauseTreemap();
 }); 

@@ -37,6 +37,11 @@ window.addEventListener('countrySelected', function(e) {
     updatePCPHighlightByCountry();
 });
 
+window.addEventListener('resetGeoFilters', function() {
+    selectedCountryFilter = null;
+    updatePCPHighlightByCountry();
+});
+
 function updatePCPHighlightByCountry() {
     d3.selectAll('.pcp-line').style('display', d => {
         if (!selectedCountryFilter) return null;
@@ -45,33 +50,6 @@ function updatePCPHighlightByCountry() {
     // Show/hide reset button
     const btn = document.getElementById('reset-country-filter-btn');
     if (btn) btn.style.display = selectedCountryFilter ? 'block' : 'none';
-}
-
-function addCountryResetButton() {
-    let btn = document.getElementById('reset-country-filter-btn');
-    if (!btn) {
-        btn = document.createElement('button');
-        btn.id = 'reset-country-filter-btn';
-        btn.textContent = 'Reset Country Filter';
-        btn.style.margin = '10px 0 10px 10px';
-        btn.style.padding = '6px 14px';
-        btn.style.background = '#e10600';
-        btn.style.color = '#fff';
-        btn.style.border = 'none';
-        btn.style.borderRadius = '4px';
-        btn.style.fontWeight = 'bold';
-        btn.style.cursor = 'pointer';
-        btn.style.display = 'none';
-        btn.onclick = function() {
-            selectedCountryFilter = null;
-            updatePCPHighlightByCountry();
-        };
-        // Insert above the PCP plot
-        const vizContainer = document.querySelector('#pcp-plot .viz-content');
-        if (vizContainer) {
-            vizContainer.parentNode.insertBefore(btn, vizContainer);
-        }
-    }
 }
 
 function initPCPPlot() {
@@ -203,7 +181,7 @@ function initPCPPlot() {
                 .attr("width", 150)  // Width is sufficient for longer labels
                 .attr("height", 30)
                 .attr("rx", 6)
-                .attr("fill", "#222")
+                .attr("fill", "#1A1A1A")
                 .attr("opacity", 0.8);
                 
             // Add axis labels with theme styling to match the heading
@@ -476,8 +454,6 @@ function initPCPPlot() {
             console.error("Error loading data:", error);
             vizContainer.innerHTML = `<div class="error-message">Failed to load data: ${error.message}</div>`;
         });
-
-    addCountryResetButton();
 }
 
 // Clean up tooltips when the window is about to unload

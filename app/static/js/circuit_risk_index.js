@@ -563,7 +563,7 @@ function initCircuitRiskIndex() {
             .enter()
             .append("rect")
             .attr("class", "country-color")
-            .attr("x", 0)
+            .attr("x", -200)
             .attr("y", (d, i) => i * 20)
             .attr("width", 20)
             .attr("height", 20)
@@ -575,7 +575,7 @@ function initCircuitRiskIndex() {
             .enter()
             .append("text")
             .attr("class", "country-label")
-            .attr("x", 25)
+            .attr("x", -180)
             .attr("y", (d, i) => i * 20 + 14)
             .text(d => d)
             .attr("fill", "#FFFFFF")
@@ -584,7 +584,7 @@ function initCircuitRiskIndex() {
             
         // Add title for country color legend
         countryLegend.append("text")
-            .attr("x", 0)
+            .attr("x", -250)
             .attr("y", -10)
             .text("F1 Activity Level")
             .attr("fill", "#FFFFFF")
@@ -677,6 +677,12 @@ function initCircuitRiskIndex() {
                 .selectAll("circle")
                 .attr("r", d => sizeScale(d.dnfPercentage));
         });
+        console.log("Double cicked")
+        // Add double-click event handler to map background
+        mapGroup.selectAll("path")
+            .on("dblclick", function() {
+                window.dispatchEvent(new CustomEvent('resetGeoFilters'));
+            });
     }).catch(function(error) {
         console.error("Error loading data:", error);
         vizContainer.innerHTML = `<div class="error-message">Failed to load circuit data: ${error.message}</div>`;

@@ -280,7 +280,7 @@ function createTeamReliabilityChart() {
                         notification.style("opacity", 0);
                         
                         // Emit event to clear filter
-                        window.dispatchEvent(new CustomEvent('teamSelected', { detail: { team: 'all' } }));
+                        window.dispatchEvent(new CustomEvent('teamSelected', { detail: { team: null } }));
                         
                         // Prevent event propagation
                         event.stopPropagation();

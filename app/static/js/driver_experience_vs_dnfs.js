@@ -51,6 +51,8 @@ let selectedTeamFilter = null;
 window.addEventListener('teamSelected', function(e) {
     selectedTeamFilter = e.detail.team;
     createDriverExperienceChart();
+    // selectedTeamFilter = null;
+    // createDriverExperienceChart();
 });
 
 function displayError(containerId) {
@@ -408,28 +410,28 @@ function createDriverExperienceChart() {
             loadingText.text("Error loading data. Please try again later.");
         });
         
-        // Add reset button
-        let resetBtn = document.getElementById('reset-team-filter-btn');
-        if (!resetBtn) {
-            resetBtn = document.createElement('button');
-            resetBtn.id = 'reset-team-filter-btn';
-            resetBtn.textContent = 'Reset Team Filter';
-            resetBtn.style.margin = '10px 0 10px 10px';
-            resetBtn.style.padding = '6px 14px';
-            resetBtn.style.background = '#e10600';
-            resetBtn.style.color = '#fff';
-            resetBtn.style.border = 'none';
-            resetBtn.style.borderRadius = '4px';
-            resetBtn.style.fontWeight = 'bold';
-            resetBtn.style.cursor = 'pointer';
-            resetBtn.style.display = 'block';
-            resetBtn.onclick = function() {
-                selectedTeamFilter = null;
-                createDriverExperienceChart();
-            };
-            vizContainer.parentNode.insertBefore(resetBtn, vizContainer);
-        }
-        resetBtn.style.display = selectedTeamFilter ? 'block' : 'none';
+        // // Add reset button
+        // let resetBtn = document.getElementById('reset-team-filter-btn');
+        // if (!resetBtn) {
+        //     resetBtn = document.createElement('button');
+        //     resetBtn.id = 'reset-team-filter-btn';
+        //     resetBtn.textContent = 'Reset Team Filter';
+        //     resetBtn.style.margin = '10px 0 10px 10px';
+        //     resetBtn.style.padding = '6px 14px';
+        //     resetBtn.style.background = '#e10600';
+        //     resetBtn.style.color = '#fff';
+        //     resetBtn.style.border = 'none';
+        //     resetBtn.style.borderRadius = '4px';
+        //     resetBtn.style.fontWeight = 'bold';
+        //     resetBtn.style.cursor = 'pointer';
+        //     resetBtn.style.display = 'block';
+        //     resetBtn.onclick = function() {
+        //         selectedTeamFilter = null;
+        //         createDriverExperienceChart();
+        //     };
+        //     vizContainer.parentNode.insertBefore(resetBtn, vizContainer);
+        // }
+        // resetBtn.style.display = selectedTeamFilter ? 'block' : 'none';
         
     } catch (error) {
         console.error("Error creating chart:", error);
