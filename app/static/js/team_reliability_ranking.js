@@ -320,7 +320,7 @@ function createTeamReliabilityChart() {
                 .attr("y", -40)
                 .attr("text-anchor", "middle")
                 .style("fill", "#ffffff")
-                .text("DNF Difference");
+                .text("No. of DNFs");
             
             // Add statistics text
             svg.append("text")
