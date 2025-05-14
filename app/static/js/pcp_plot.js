@@ -362,6 +362,82 @@ function initPCPPlot() {
                 tooltip.style("visibility", "hidden");
             });
             
+            // Add legend when in expanded view
+            if (isExpanded) {
+                // Get min and max years for the legend
+                const yearExtent = d3.extent(pcpData, d => d.year);
+                const minYear = yearExtent[0];
+                const maxYear = yearExtent[1];
+                
+                // Create a gradient for the legend
+                const legendWidth = 200;
+                const legendHeight = 20;
+                
+                // Create a group for the legend
+                const legendGroup = svg.append("g")
+                    .attr("class", "legend")
+                    .attr("transform", `translate(${width - legendWidth - 20}, ${height + 40})`);
+                
+                // Add a title for the legend
+                legendGroup.append("text")
+                    .attr("x", legendWidth / 2)
+                    .attr("y", -10)
+                    .attr("text-anchor", "middle")
+                    .style("fill", "#fff")
+                    .style("font-weight", "bold")
+                    .style("font-size", "14px")
+                    .style("font-family", "'Roboto', 'Arial', sans-serif")
+                    .text("Year");
+                
+                // Create gradient definition
+                const defs = svg.append("defs");
+                const linearGradient = defs.append("linearGradient")
+                    .attr("id", "year-gradient")
+                    .attr("x1", "0%")
+                    .attr("y1", "0%")
+                    .attr("x2", "100%")
+                    .attr("y2", "0%");
+                
+                // Sample colors from the colorScale for the gradient
+                const numStops = 10;
+                for (let i = 0; i <= numStops; i++) {
+                    const year = minYear + (i / numStops) * (maxYear - minYear);
+                    linearGradient.append("stop")
+                        .attr("offset", `${i * 100 / numStops}%`)
+                        .attr("stop-color", colorScale(year));
+                }
+                
+                // Add the colored rectangle
+                legendGroup.append("rect")
+                    .attr("width", legendWidth)
+                    .attr("height", legendHeight)
+                    .style("fill", "url(#year-gradient)")
+                    .style("stroke", "#fff")
+                    .style("stroke-width", 1);
+                
+                // Add axis for the legend
+                const legendScale = d3.scaleLinear()
+                    .domain([minYear, maxYear])
+                    .range([0, legendWidth]);
+                
+                const legendAxis = d3.axisBottom(legendScale)
+                    .ticks(5)
+                    .tickFormat(d3.format("d")); // Format as integer
+                
+                legendGroup.append("g")
+                    .attr("transform", `translate(0, ${legendHeight})`)
+                    .call(legendAxis)
+                    .selectAll("text")
+                    .style("fill", "#fff")
+                    .style("font-weight", "bold")
+                    .style("font-size", "12px");
+                
+                // Style the legend axis
+                legendGroup.selectAll(".domain, .tick line")
+                    .style("stroke", "#fff")
+                    .style("stroke-width", 1);
+            }
+            
             // Drag functions
             function dragstarted(event, d) {
                 d3.select(this).raise().classed("active", true);
