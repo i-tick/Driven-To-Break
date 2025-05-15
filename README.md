@@ -2,30 +2,7 @@
 
 This project is a web application built using Flask that provides various visualizations related to Formula 1 race data. The visualizations aim to analyze and present insights on Did Not Finish (DNF) statistics, failure causes, team reliability, and more.
 
-## Project Structure
-
-```
-visualisation-project
-├── app
-│   ├── __init__.py
-│   ├── routes.py
-│   ├── static
-│   │   ├── css
-│   │   │   └── styles.css
-│   │   ├── js
-│   │   │   └── visualizations.js
-│   │   └── d3
-│   │       └── d3.min.js
-│   └── templates
-│       ├── base.html
-│       ├── index.html
-│       └── visualizations.html
-├── data
-│   └── sample_data.csv
-├── requirements.txt
-├── run.py
-└── README.md
-```
+[Youtube Demo](https://youtu.be/fQx6Z0H1ftQ): https://youtu.be/fQx6Z0H1ftQ
 
 ## Visualizations
 
